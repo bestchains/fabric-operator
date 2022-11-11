@@ -62,6 +62,9 @@ metadata:
   name: "$NS"
 EOF
 
+  # https://kubernetes.io/docs/tasks/configure-pod-container/migrate-from-psp/
+  kubectl label --overwrite namespace $NS pod-security.kubernetes.io/enforce=baseline
+
   pop_fn
 }
 
