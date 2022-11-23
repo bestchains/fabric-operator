@@ -248,16 +248,15 @@ func (fake *Update) CertificateCreated() bool {
 	ret, specificReturn := fake.certificateCreatedReturnsOnCall[len(fake.certificateCreatedArgsForCall)]
 	fake.certificateCreatedArgsForCall = append(fake.certificateCreatedArgsForCall, struct {
 	}{})
-	stub := fake.CertificateCreatedStub
-	fakeReturns := fake.certificateCreatedReturns
 	fake.recordInvocation("CertificateCreated", []interface{}{})
 	fake.certificateCreatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.CertificateCreatedStub != nil {
+		return fake.CertificateCreatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.certificateCreatedReturns
 	return fakeReturns.result1
 }
 
@@ -301,16 +300,15 @@ func (fake *Update) CertificateUpdated() bool {
 	ret, specificReturn := fake.certificateUpdatedReturnsOnCall[len(fake.certificateUpdatedArgsForCall)]
 	fake.certificateUpdatedArgsForCall = append(fake.certificateUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.CertificateUpdatedStub
-	fakeReturns := fake.certificateUpdatedReturns
 	fake.recordInvocation("CertificateUpdated", []interface{}{})
 	fake.certificateUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.CertificateUpdatedStub != nil {
+		return fake.CertificateUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.certificateUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -354,16 +352,15 @@ func (fake *Update) ConfigOverridesUpdated() bool {
 	ret, specificReturn := fake.configOverridesUpdatedReturnsOnCall[len(fake.configOverridesUpdatedArgsForCall)]
 	fake.configOverridesUpdatedArgsForCall = append(fake.configOverridesUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.ConfigOverridesUpdatedStub
-	fakeReturns := fake.configOverridesUpdatedReturns
 	fake.recordInvocation("ConfigOverridesUpdated", []interface{}{})
 	fake.configOverridesUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.ConfigOverridesUpdatedStub != nil {
+		return fake.ConfigOverridesUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.configOverridesUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -407,16 +404,15 @@ func (fake *Update) CryptoBackupNeeded() bool {
 	ret, specificReturn := fake.cryptoBackupNeededReturnsOnCall[len(fake.cryptoBackupNeededArgsForCall)]
 	fake.cryptoBackupNeededArgsForCall = append(fake.cryptoBackupNeededArgsForCall, struct {
 	}{})
-	stub := fake.CryptoBackupNeededStub
-	fakeReturns := fake.cryptoBackupNeededReturns
 	fake.recordInvocation("CryptoBackupNeeded", []interface{}{})
 	fake.cryptoBackupNeededMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.CryptoBackupNeededStub != nil {
+		return fake.CryptoBackupNeededStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.cryptoBackupNeededReturns
 	return fakeReturns.result1
 }
 
@@ -460,16 +456,15 @@ func (fake *Update) DeploymentUpdated() bool {
 	ret, specificReturn := fake.deploymentUpdatedReturnsOnCall[len(fake.deploymentUpdatedArgsForCall)]
 	fake.deploymentUpdatedArgsForCall = append(fake.deploymentUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.DeploymentUpdatedStub
-	fakeReturns := fake.deploymentUpdatedReturns
 	fake.recordInvocation("DeploymentUpdated", []interface{}{})
 	fake.deploymentUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.DeploymentUpdatedStub != nil {
+		return fake.DeploymentUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.deploymentUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -513,16 +508,15 @@ func (fake *Update) EcertEnroll() bool {
 	ret, specificReturn := fake.ecertEnrollReturnsOnCall[len(fake.ecertEnrollArgsForCall)]
 	fake.ecertEnrollArgsForCall = append(fake.ecertEnrollArgsForCall, struct {
 	}{})
-	stub := fake.EcertEnrollStub
-	fakeReturns := fake.ecertEnrollReturns
 	fake.recordInvocation("EcertEnroll", []interface{}{})
 	fake.ecertEnrollMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.EcertEnrollStub != nil {
+		return fake.EcertEnrollStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.ecertEnrollReturns
 	return fakeReturns.result1
 }
 
@@ -566,16 +560,15 @@ func (fake *Update) EcertNewKeyReenroll() bool {
 	ret, specificReturn := fake.ecertNewKeyReenrollReturnsOnCall[len(fake.ecertNewKeyReenrollArgsForCall)]
 	fake.ecertNewKeyReenrollArgsForCall = append(fake.ecertNewKeyReenrollArgsForCall, struct {
 	}{})
-	stub := fake.EcertNewKeyReenrollStub
-	fakeReturns := fake.ecertNewKeyReenrollReturns
 	fake.recordInvocation("EcertNewKeyReenroll", []interface{}{})
 	fake.ecertNewKeyReenrollMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.EcertNewKeyReenrollStub != nil {
+		return fake.EcertNewKeyReenrollStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.ecertNewKeyReenrollReturns
 	return fakeReturns.result1
 }
 
@@ -619,16 +612,15 @@ func (fake *Update) EcertReenrollNeeded() bool {
 	ret, specificReturn := fake.ecertReenrollNeededReturnsOnCall[len(fake.ecertReenrollNeededArgsForCall)]
 	fake.ecertReenrollNeededArgsForCall = append(fake.ecertReenrollNeededArgsForCall, struct {
 	}{})
-	stub := fake.EcertReenrollNeededStub
-	fakeReturns := fake.ecertReenrollNeededReturns
 	fake.recordInvocation("EcertReenrollNeeded", []interface{}{})
 	fake.ecertReenrollNeededMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.EcertReenrollNeededStub != nil {
+		return fake.EcertReenrollNeededStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.ecertReenrollNeededReturns
 	return fakeReturns.result1
 }
 
@@ -672,16 +664,15 @@ func (fake *Update) EcertUpdated() bool {
 	ret, specificReturn := fake.ecertUpdatedReturnsOnCall[len(fake.ecertUpdatedArgsForCall)]
 	fake.ecertUpdatedArgsForCall = append(fake.ecertUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.EcertUpdatedStub
-	fakeReturns := fake.ecertUpdatedReturns
 	fake.recordInvocation("EcertUpdated", []interface{}{})
 	fake.ecertUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.EcertUpdatedStub != nil {
+		return fake.EcertUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.ecertUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -725,16 +716,15 @@ func (fake *Update) FabricVersionUpdated() bool {
 	ret, specificReturn := fake.fabricVersionUpdatedReturnsOnCall[len(fake.fabricVersionUpdatedArgsForCall)]
 	fake.fabricVersionUpdatedArgsForCall = append(fake.fabricVersionUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.FabricVersionUpdatedStub
-	fakeReturns := fake.fabricVersionUpdatedReturns
 	fake.recordInvocation("FabricVersionUpdated", []interface{}{})
 	fake.fabricVersionUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.FabricVersionUpdatedStub != nil {
+		return fake.FabricVersionUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.fabricVersionUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -778,16 +768,15 @@ func (fake *Update) GetCreatedCertType() common.SecretType {
 	ret, specificReturn := fake.getCreatedCertTypeReturnsOnCall[len(fake.getCreatedCertTypeArgsForCall)]
 	fake.getCreatedCertTypeArgsForCall = append(fake.getCreatedCertTypeArgsForCall, struct {
 	}{})
-	stub := fake.GetCreatedCertTypeStub
-	fakeReturns := fake.getCreatedCertTypeReturns
 	fake.recordInvocation("GetCreatedCertType", []interface{}{})
 	fake.getCreatedCertTypeMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.GetCreatedCertTypeStub != nil {
+		return fake.GetCreatedCertTypeStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.getCreatedCertTypeReturns
 	return fakeReturns.result1
 }
 
@@ -831,16 +820,15 @@ func (fake *Update) ImagesUpdated() bool {
 	ret, specificReturn := fake.imagesUpdatedReturnsOnCall[len(fake.imagesUpdatedArgsForCall)]
 	fake.imagesUpdatedArgsForCall = append(fake.imagesUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.ImagesUpdatedStub
-	fakeReturns := fake.imagesUpdatedReturns
 	fake.recordInvocation("ImagesUpdated", []interface{}{})
 	fake.imagesUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.ImagesUpdatedStub != nil {
+		return fake.ImagesUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.imagesUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -884,16 +872,15 @@ func (fake *Update) MSPUpdated() bool {
 	ret, specificReturn := fake.mSPUpdatedReturnsOnCall[len(fake.mSPUpdatedArgsForCall)]
 	fake.mSPUpdatedArgsForCall = append(fake.mSPUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.MSPUpdatedStub
-	fakeReturns := fake.mSPUpdatedReturns
 	fake.recordInvocation("MSPUpdated", []interface{}{})
 	fake.mSPUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.MSPUpdatedStub != nil {
+		return fake.MSPUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.mSPUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -937,16 +924,15 @@ func (fake *Update) MigrateToV2() bool {
 	ret, specificReturn := fake.migrateToV2ReturnsOnCall[len(fake.migrateToV2ArgsForCall)]
 	fake.migrateToV2ArgsForCall = append(fake.migrateToV2ArgsForCall, struct {
 	}{})
-	stub := fake.MigrateToV2Stub
-	fakeReturns := fake.migrateToV2Returns
 	fake.recordInvocation("MigrateToV2", []interface{}{})
 	fake.migrateToV2Mutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.MigrateToV2Stub != nil {
+		return fake.MigrateToV2Stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.migrateToV2Returns
 	return fakeReturns.result1
 }
 
@@ -990,16 +976,15 @@ func (fake *Update) MigrateToV24() bool {
 	ret, specificReturn := fake.migrateToV24ReturnsOnCall[len(fake.migrateToV24ArgsForCall)]
 	fake.migrateToV24ArgsForCall = append(fake.migrateToV24ArgsForCall, struct {
 	}{})
-	stub := fake.MigrateToV24Stub
-	fakeReturns := fake.migrateToV24Returns
 	fake.recordInvocation("MigrateToV24", []interface{}{})
 	fake.migrateToV24Mutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.MigrateToV24Stub != nil {
+		return fake.MigrateToV24Stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.migrateToV24Returns
 	return fakeReturns.result1
 }
 
@@ -1043,16 +1028,15 @@ func (fake *Update) NodeOUUpdated() bool {
 	ret, specificReturn := fake.nodeOUUpdatedReturnsOnCall[len(fake.nodeOUUpdatedArgsForCall)]
 	fake.nodeOUUpdatedArgsForCall = append(fake.nodeOUUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.NodeOUUpdatedStub
-	fakeReturns := fake.nodeOUUpdatedReturns
 	fake.recordInvocation("NodeOUUpdated", []interface{}{})
 	fake.nodeOUUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.NodeOUUpdatedStub != nil {
+		return fake.NodeOUUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.nodeOUUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -1096,16 +1080,15 @@ func (fake *Update) OrdererTagUpdated() bool {
 	ret, specificReturn := fake.ordererTagUpdatedReturnsOnCall[len(fake.ordererTagUpdatedArgsForCall)]
 	fake.ordererTagUpdatedArgsForCall = append(fake.ordererTagUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.OrdererTagUpdatedStub
-	fakeReturns := fake.ordererTagUpdatedReturns
 	fake.recordInvocation("OrdererTagUpdated", []interface{}{})
 	fake.ordererTagUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.OrdererTagUpdatedStub != nil {
+		return fake.OrdererTagUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.ordererTagUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -1149,16 +1132,15 @@ func (fake *Update) RestartNeeded() bool {
 	ret, specificReturn := fake.restartNeededReturnsOnCall[len(fake.restartNeededArgsForCall)]
 	fake.restartNeededArgsForCall = append(fake.restartNeededArgsForCall, struct {
 	}{})
-	stub := fake.RestartNeededStub
-	fakeReturns := fake.restartNeededReturns
 	fake.recordInvocation("RestartNeeded", []interface{}{})
 	fake.restartNeededMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.RestartNeededStub != nil {
+		return fake.RestartNeededStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.restartNeededReturns
 	return fakeReturns.result1
 }
 
@@ -1202,16 +1184,15 @@ func (fake *Update) SpecUpdated() bool {
 	ret, specificReturn := fake.specUpdatedReturnsOnCall[len(fake.specUpdatedArgsForCall)]
 	fake.specUpdatedArgsForCall = append(fake.specUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.SpecUpdatedStub
-	fakeReturns := fake.specUpdatedReturns
 	fake.recordInvocation("SpecUpdated", []interface{}{})
 	fake.specUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.SpecUpdatedStub != nil {
+		return fake.SpecUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.specUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -1255,16 +1236,15 @@ func (fake *Update) TLSCertUpdated() bool {
 	ret, specificReturn := fake.tLSCertUpdatedReturnsOnCall[len(fake.tLSCertUpdatedArgsForCall)]
 	fake.tLSCertUpdatedArgsForCall = append(fake.tLSCertUpdatedArgsForCall, struct {
 	}{})
-	stub := fake.TLSCertUpdatedStub
-	fakeReturns := fake.tLSCertUpdatedReturns
 	fake.recordInvocation("TLSCertUpdated", []interface{}{})
 	fake.tLSCertUpdatedMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.TLSCertUpdatedStub != nil {
+		return fake.TLSCertUpdatedStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.tLSCertUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -1308,16 +1288,15 @@ func (fake *Update) TLScertEnroll() bool {
 	ret, specificReturn := fake.tLScertEnrollReturnsOnCall[len(fake.tLScertEnrollArgsForCall)]
 	fake.tLScertEnrollArgsForCall = append(fake.tLScertEnrollArgsForCall, struct {
 	}{})
-	stub := fake.TLScertEnrollStub
-	fakeReturns := fake.tLScertEnrollReturns
 	fake.recordInvocation("TLScertEnroll", []interface{}{})
 	fake.tLScertEnrollMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.TLScertEnrollStub != nil {
+		return fake.TLScertEnrollStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.tLScertEnrollReturns
 	return fakeReturns.result1
 }
 
@@ -1361,16 +1340,15 @@ func (fake *Update) TLScertNewKeyReenroll() bool {
 	ret, specificReturn := fake.tLScertNewKeyReenrollReturnsOnCall[len(fake.tLScertNewKeyReenrollArgsForCall)]
 	fake.tLScertNewKeyReenrollArgsForCall = append(fake.tLScertNewKeyReenrollArgsForCall, struct {
 	}{})
-	stub := fake.TLScertNewKeyReenrollStub
-	fakeReturns := fake.tLScertNewKeyReenrollReturns
 	fake.recordInvocation("TLScertNewKeyReenroll", []interface{}{})
 	fake.tLScertNewKeyReenrollMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.TLScertNewKeyReenrollStub != nil {
+		return fake.TLScertNewKeyReenrollStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.tLScertNewKeyReenrollReturns
 	return fakeReturns.result1
 }
 
@@ -1414,16 +1392,15 @@ func (fake *Update) TLScertReenrollNeeded() bool {
 	ret, specificReturn := fake.tLScertReenrollNeededReturnsOnCall[len(fake.tLScertReenrollNeededArgsForCall)]
 	fake.tLScertReenrollNeededArgsForCall = append(fake.tLScertReenrollNeededArgsForCall, struct {
 	}{})
-	stub := fake.TLScertReenrollNeededStub
-	fakeReturns := fake.tLScertReenrollNeededReturns
 	fake.recordInvocation("TLScertReenrollNeeded", []interface{}{})
 	fake.tLScertReenrollNeededMutex.Unlock()
-	if stub != nil {
-		return stub()
+	if fake.TLScertReenrollNeededStub != nil {
+		return fake.TLScertReenrollNeededStub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
+	fakeReturns := fake.tLScertReenrollNeededReturns
 	return fakeReturns.result1
 }
 

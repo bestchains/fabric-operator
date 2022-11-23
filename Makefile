@@ -154,7 +154,7 @@ vet:
 
 # Generate code
 generate: controller-gen
-	$(CONTROLLER_GEN) object:headerFile="boilerplate/boilerplate.go.txt" paths="./..."
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 # Build the docker image
 docker-build: test
@@ -179,6 +179,22 @@ ifeq (, $(shell which controller-gen))
 CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
+endif
+
+.PHONY: mocks
+mocks: counterfeiter
+	go generate ./...
+
+counterfeiter:
+ifeq (, $(shell which counterfeiter))
+	@{ \
+	set -e ;\
+	COUNTERFEITER_TMP_DIR=$$(mktemp -d) ;\
+	cd $$COUNTERFEITER_TMP_DIR ;\
+	go mod init tmp ;\
+	go install github.com/maxbrunsfeld/counterfeiter/v6 ;\
+	rm -rf $$COUNTERFEITER_TMP_DIR ;\
+	}
 endif
 
 kustomize:
