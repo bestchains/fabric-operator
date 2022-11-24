@@ -120,6 +120,10 @@ const (
 	// Initializing is the status when a component is initializing
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
 	Initializing IBPCRStatusType = "Initializing"
+
+	// Created is the status when component is created successfully without any deployments
+	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
+	Created IBPCRStatusType = "Created"
 )
 
 // +k8s:deepcopy-gen=true
@@ -320,4 +324,17 @@ type MSP struct {
 	// AdminCerts is base64 encoded admincerts array
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
 	AdminCerts []string `json:"admincerts,omitempty"`
+}
+
+// +k8s:deepcopy-gen=true
+// CAReference contains the reference to a CA server
+// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
+type CAReference struct {
+	// Name is the CA server name
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
+	Name string `json:"name,omitempty"`
+
+	// CA indicates which `ca` (ca/tlsca) is being used
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
+	CA string `json:"ca,omitempty"`
 }

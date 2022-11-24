@@ -152,18 +152,22 @@ rules:
       - ibppeers.ibp.com
       - ibporderers.ibp.com
       - ibpconsoles.ibp.com
+      - organizations.ibp.com
       - ibpcas
       - ibppeers
       - ibporderers
       - ibpconsoles
+      - organizations
       - ibpcas/finalizers
       - ibppeers/finalizers
       - ibporderers/finalizers
       - ibpconsoles/finalizers
+      - organizations/finalizers
       - ibpcas/status
       - ibppeers/status
       - ibporderers/status
       - ibpconsoles/status
+      - organizations/status
     verbs:
       - get
       - list

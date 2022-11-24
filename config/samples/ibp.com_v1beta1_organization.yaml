@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: org1-admin-secret
+data:
+  enrollSecret: b3JnMWFkbWlucHc=
+---
+apiVersion: ibp.com/v1beta1
+kind: Organization
+metadata:
+  name: org1
+spec:
+  license:
+    accept: true
+  displayName: "test organization"
+  admin: org1admin
+  adminSecret: org1-admin-secret # default {org_name}-admin-secret
+  caReference: 
+    name: org1-ca
+    ca: ca
+  description: "test org2"

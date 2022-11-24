@@ -21,19 +21,21 @@ package operatorconfig
 import (
 	cainit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/ca"
 	ordererinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/orderer"
+	orginit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/organization"
 	peerinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/peer"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/offering"
 	"github.com/go-logr/logr"
 )
 
 type Config struct {
-	CAInitConfig      *cainit.Config
-	PeerInitConfig    *peerinit.Config
-	OrdererInitConfig *ordererinit.Config
-	ConsoleInitConfig *ConsoleConfig
-	Offering          offering.Type
-	Operator          Operator
-	Logger            *logr.Logger
+	CAInitConfig           *cainit.Config
+	PeerInitConfig         *peerinit.Config
+	OrdererInitConfig      *ordererinit.Config
+	ConsoleInitConfig      *ConsoleConfig
+	OrganizationInitConfig *orginit.Config
+	Offering               offering.Type
+	Operator               Operator
+	Logger                 *logr.Logger
 }
 
 type ConsoleConfig struct {

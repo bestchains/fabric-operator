@@ -26,6 +26,7 @@ import (
 	"github.com/IBM-Blockchain/fabric-operator/pkg/command"
 	cainit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/ca"
 	ordererinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/orderer"
+	orginit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/organization"
 	peerinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/peer"
 
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -69,6 +70,7 @@ func main() {
 	setDefaultPeerDefinitions(operatorCfg)
 	setDefaultOrdererDefinitions(operatorCfg)
 	setDefaultConsoleDefinitions(operatorCfg)
+	setDefaultOrganizationDefinitions(operatorCfg)
 
 	operatorCfg.Operator.SetDefaults()
 
@@ -194,5 +196,11 @@ func setDefaultConsoleDefinitions(cfg *config.Config) {
 		RouteFile:                filepath.Join(defaultConsoleDef, "route.yaml"),
 		NetworkPolicyIngressFile: filepath.Join(defaultConsoleDef, "networkpolicy-ingress.yaml"),
 		NetworkPolicyDenyAllFile: filepath.Join(defaultConsoleDef, "networkpolicy-denyall.yaml"),
+	}
+}
+
+func setDefaultOrganizationDefinitions(cfg *config.Config) {
+	cfg.OrganizationInitConfig = &orginit.Config{
+		StoragePath: "/tmp/orginit",
 	}
 }

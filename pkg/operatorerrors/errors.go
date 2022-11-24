@@ -52,6 +52,7 @@ const (
 	FabricOrdererMigrationFailed       = 25
 	InvalidCustomResourceCreateRequest = 26
 	FabricCAMigrationFailed            = 27
+	OrganizationInitilizationFailed    = 32
 )
 
 var (
@@ -79,6 +80,8 @@ var (
 		FabricPeerMigrationFailed:          nil,
 		FabricOrdererMigrationFailed:       nil,
 		InvalidCustomResourceCreateRequest: nil,
+		FabricCAMigrationFailed:            nil,
+		OrganizationInitilizationFailed:    nil,
 	}
 )
 
