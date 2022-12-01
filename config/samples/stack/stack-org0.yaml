@@ -1,0 +1,128 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: org0
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: org0admin
+  namespace: org0
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: org0admin-secret
+  namespace: org0
+  annotations:
+    kubernetes.io/service-account.name: org0admin
+type: kubernetes.io/service-account-token
+---
+apiVersion: ibp.com/v1beta1
+kind: IBPCA
+metadata:
+  name: org0-ca
+  namespace: org0
+spec:
+  action:
+    renew: {}
+  configoverride:
+    ca:
+      registry:
+        identities:
+          - name: rcaadmin
+            pass: rcaadminpw
+            type: client
+            attrs:
+              hf.Registrar.Roles: "*"
+              hf.Registrar.DelegateRoles: "*"
+              hf.Revoker: true
+              hf.IntermediateCA: true
+              hf.GenCRL: true
+              hf.Registrar.Attributes: "*"
+              hf.AffiliationMgr: true
+          - name: org0admin
+            pass: org0adminpw
+            type: admin
+      debug: true
+      signing:
+        default:
+          expiry: 87600h0m0s
+    tlsca:
+      registry:
+        identities:
+          - name: admin
+            pass: adminpw
+            type: client # todo: shouldn't this be an admin?
+            attrs:
+              hf.Registrar.Roles: "*"
+              hf.Registrar.DelegateRoles: "*"
+              hf.Revoker: true
+              hf.IntermediateCA: true
+              hf.GenCRL: true
+              hf.Registrar.Attributes: "*"
+              hf.AffiliationMgr: true
+          - name: org0admin
+            pass: org0adminpw
+            type: admin
+      debug: true
+      signing:
+        default:
+          expiry: 87600h0m0s
+  customNames:
+    pvc: {}
+  domain: localho.st
+  images:
+    caImage: hyperledgerk8s/fabric-ca
+    caTag: "1.5.5"
+    caInitImage: hyperledgerk8s/ubi-minimal
+    caInitTag: latest
+  license:
+    accept: true
+  replicas: 1
+  resources:
+    ca:
+      limits:
+        cpu: 100m
+        memory: 200M
+      requests:
+        cpu: 10m
+        memory: 10M
+    init:
+      limits:
+        cpu: 100m
+        memory: 200M
+      requests:
+        cpu: 10m
+        memory: 10M
+  service:
+    type: ClusterIP
+  storage:
+    ca:
+      class: "standard"
+      size: 100M
+  version: "1.5"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: org0-admin-secret
+  namespace: org0
+data:
+  enrollSecret: b3JnMGFkbWlucHcK
+---
+apiVersion: ibp.com/v1beta1
+kind: Organization
+metadata:
+  name: org0
+  namespace: org0
+spec:
+  license:
+    accept: true
+  displayName: "test organization"
+  admin: org0admin
+  adminSecret: org0-admin-secret
+  caReference: 
+    name: org0-ca
+    ca: ca
+  description: "test org0"

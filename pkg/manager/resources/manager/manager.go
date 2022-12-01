@@ -22,6 +22,8 @@ import (
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
 	k8sclient "github.com/IBM-Blockchain/fabric-operator/pkg/k8s/controllerclient"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/clusterrole"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/clusterrolebinding"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/configmap"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/deployment"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/ingress"
@@ -130,6 +132,28 @@ func (m *Manager) CreateRoleBindingManager(name string, oFunc func(v1.Object, *r
 		Name:            name,
 		LabelsFunc:      labelsFunc,
 		OverrideFunc:    oFunc,
+	}
+}
+
+func (m *Manager) CreateClusterRoleManager(name string, oFunc func(v1.Object, *rbacv1.ClusterRole, resources.Action) error, labelsFunc func(v1.Object) map[string]string, file string) resources.Manager {
+	return &clusterrole.Manager{
+		Client:          m.Client,
+		Scheme:          m.Scheme,
+		ClusterRoleFile: file,
+		Name:            name,
+		LabelsFunc:      labelsFunc,
+		OverrideFunc:    oFunc,
+	}
+}
+
+func (m *Manager) CreateClusterRoleBindingManager(name string, oFunc func(v1.Object, *rbacv1.ClusterRoleBinding, resources.Action) error, labelsFunc func(v1.Object) map[string]string, file string) resources.Manager {
+	return &clusterrolebinding.Manager{
+		Client:                 m.Client,
+		Scheme:                 m.Scheme,
+		ClusterRoleBindingFile: file,
+		Name:                   name,
+		LabelsFunc:             labelsFunc,
+		OverrideFunc:           oFunc,
 	}
 }
 

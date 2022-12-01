@@ -18,6 +18,16 @@ type Update struct {
 	adminOrCAUpdatedReturnsOnCall map[int]struct {
 		result1 bool
 	}
+	SpecUpdatedStub        func() bool
+	specUpdatedMutex       sync.RWMutex
+	specUpdatedArgsForCall []struct {
+	}
+	specUpdatedReturns struct {
+		result1 bool
+	}
+	specUpdatedReturnsOnCall map[int]struct {
+		result1 bool
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -74,11 +84,65 @@ func (fake *Update) AdminOrCAUpdatedReturnsOnCall(i int, result1 bool) {
 	}{result1}
 }
 
+func (fake *Update) SpecUpdated() bool {
+	fake.specUpdatedMutex.Lock()
+	ret, specificReturn := fake.specUpdatedReturnsOnCall[len(fake.specUpdatedArgsForCall)]
+	fake.specUpdatedArgsForCall = append(fake.specUpdatedArgsForCall, struct {
+	}{})
+	fake.recordInvocation("SpecUpdated", []interface{}{})
+	fake.specUpdatedMutex.Unlock()
+	if fake.SpecUpdatedStub != nil {
+		return fake.SpecUpdatedStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.specUpdatedReturns
+	return fakeReturns.result1
+}
+
+func (fake *Update) SpecUpdatedCallCount() int {
+	fake.specUpdatedMutex.RLock()
+	defer fake.specUpdatedMutex.RUnlock()
+	return len(fake.specUpdatedArgsForCall)
+}
+
+func (fake *Update) SpecUpdatedCalls(stub func() bool) {
+	fake.specUpdatedMutex.Lock()
+	defer fake.specUpdatedMutex.Unlock()
+	fake.SpecUpdatedStub = stub
+}
+
+func (fake *Update) SpecUpdatedReturns(result1 bool) {
+	fake.specUpdatedMutex.Lock()
+	defer fake.specUpdatedMutex.Unlock()
+	fake.SpecUpdatedStub = nil
+	fake.specUpdatedReturns = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *Update) SpecUpdatedReturnsOnCall(i int, result1 bool) {
+	fake.specUpdatedMutex.Lock()
+	defer fake.specUpdatedMutex.Unlock()
+	fake.SpecUpdatedStub = nil
+	if fake.specUpdatedReturnsOnCall == nil {
+		fake.specUpdatedReturnsOnCall = make(map[int]struct {
+			result1 bool
+		})
+	}
+	fake.specUpdatedReturnsOnCall[i] = struct {
+		result1 bool
+	}{result1}
+}
+
 func (fake *Update) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
 	fake.adminOrCAUpdatedMutex.RLock()
 	defer fake.adminOrCAUpdatedMutex.RUnlock()
+	fake.specUpdatedMutex.RLock()
+	defer fake.specUpdatedMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

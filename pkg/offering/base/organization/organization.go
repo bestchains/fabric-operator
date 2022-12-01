@@ -38,6 +38,7 @@ var log = logf.Log.WithName("base_organization")
 //go:generate counterfeiter -o mocks/update.go -fake-name Update . Update
 
 type Update interface {
+	SpecUpdated() bool
 	AdminOrCAUpdated() bool
 }
 

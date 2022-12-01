@@ -124,6 +124,22 @@ const (
 	// Created is the status when component is created successfully without any deployments
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
 	Created IBPCRStatusType = "Created"
+
+	// Pending means `Proposal-Vote` not passed yet
+	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
+	FederationPending IBPCRStatusType = "FederationPending"
+
+	// Activated means `Proposal-Vote`passed
+	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
+	FederationActivated IBPCRStatusType = "FederationActivated"
+
+	// Failed means `Proposal-Vote` failed
+	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
+	FederationFailed IBPCRStatusType = "FederationFailed"
+
+	// Dissolved means `Federation` no longer active
+	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
+	FederationDissolved IBPCRStatusType = "FederationDissolved"
 )
 
 // +k8s:deepcopy-gen=true
@@ -338,3 +354,22 @@ type CAReference struct {
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
 	CA string `json:"ca,omitempty"`
 }
+
+type NamespacedName struct {
+	Name      string `json:"name,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
+}
+
+// +k8s:deepcopy-gen=true
+// Policy defines the Proposal-Vote policy  to indicate when a proposal is successful
+// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=tru
+type Policy string
+
+const (
+	// +k8s:deepcopy-gen=true
+	// CAReference contains the reference to a CA server
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=tru
+	OneVoteVeto Policy = "OneVoteVeto"
+	Majority    Policy = "Majority"
+	ALL         Policy = "All"
+)

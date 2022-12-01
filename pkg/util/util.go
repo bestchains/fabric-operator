@@ -938,3 +938,17 @@ func GetRegistyServer() string {
 	// By default, it'll pull the images from docker hub and using hyperledgerk8s repository
 	return "hyperledgerk8s/"
 }
+
+func GetNamespacedName(namespacedName string) types.NamespacedName {
+	strs := strings.Split(namespacedName, "-")
+	if len(strs) < 2 {
+		return types.NamespacedName{
+			Namespace: "",
+			Name:      namespacedName,
+		}
+	}
+	return types.NamespacedName{
+		Namespace: strs[0],
+		Name:      strs[1],
+	}
+}

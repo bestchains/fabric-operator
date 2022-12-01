@@ -25,6 +25,7 @@ import (
 	config "github.com/IBM-Blockchain/fabric-operator/operatorconfig"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/command"
 	cainit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/ca"
+	fedinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/federation"
 	ordererinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/orderer"
 	orginit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/organization"
 	peerinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/peer"
@@ -42,11 +43,12 @@ import (
 )
 
 const (
-	defaultConfigs    = "./defaultconfig"
-	defaultPeerDef    = "./definitions/peer"
-	defaultCADef      = "./definitions/ca"
-	defaultOrdererDef = "./definitions/orderer"
-	defaultConsoleDef = "./definitions/console"
+	defaultConfigs       = "./defaultconfig"
+	defaultPeerDef       = "./definitions/peer"
+	defaultCADef         = "./definitions/ca"
+	defaultOrdererDef    = "./definitions/orderer"
+	defaultConsoleDef    = "./definitions/console"
+	defaultFederationDef = "./definitions/federation"
 )
 
 var log = logf.Log.WithName("cmd")
@@ -71,6 +73,7 @@ func main() {
 	setDefaultOrdererDefinitions(operatorCfg)
 	setDefaultConsoleDefinitions(operatorCfg)
 	setDefaultOrganizationDefinitions(operatorCfg)
+	setDefaultFederationDefinitions(operatorCfg)
 
 	operatorCfg.Operator.SetDefaults()
 
@@ -202,5 +205,12 @@ func setDefaultConsoleDefinitions(cfg *config.Config) {
 func setDefaultOrganizationDefinitions(cfg *config.Config) {
 	cfg.OrganizationInitConfig = &orginit.Config{
 		StoragePath: "/tmp/orginit",
+	}
+}
+
+func setDefaultFederationDefinitions(cfg *config.Config) {
+	cfg.FederationInitConfig = &fedinit.Config{
+		ClusterRoleFile:        filepath.Join(defaultFederationDef, "clusterrole.yaml"),
+		ClusterRoleBindingFile: filepath.Join(defaultFederationDef, "clusterrolebinding.yaml"),
 	}
 }

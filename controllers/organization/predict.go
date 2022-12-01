@@ -19,127 +19,245 @@
 package organization
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
+	"github.com/pkg/errors"
+
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
-	corev1 "k8s.io/api/core/v1"
+	k8sclient "github.com/IBM-Blockchain/fabric-operator/pkg/k8s/controllerclient"
+	"github.com/go-test/deep"
+	"gopkg.in/yaml.v2"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 )
 
 func (r *ReconcileOrganization) CreateFunc(e event.CreateEvent) bool {
-	update := Update{}
-
+	var reconcile bool
 	switch e.Object.(type) {
 	case *current.Organization:
 		organization := e.Object.(*current.Organization)
-		log.Info(fmt.Sprintf("Create event detected for organization '%s'", organization.GetName()))
+		log.Info(fmt.Sprintf("Create event detected for organization '%s'", organization.GetNamespacedName()))
+		reconcile = r.PredictOrganizationCreate(organization)
+		if reconcile {
+			log.Info(fmt.Sprintf("Create event triggering reconcile for creating organization '%s'", organization.GetNamespacedName()))
+		}
 
-		update.adminOrCAUpdated = true
-		r.PushUpdate(organization.GetName(), update)
-
-		log.Info(fmt.Sprintf("Create event triggering reconcile for creating organization '%s'", organization.GetName()))
-	case *corev1.Secret:
-		// TODO: add owner reference to admin-secret and organization-secret
-		return false
+	case *current.Federation:
+		federation := e.Object.(*current.Federation)
+		log.Info(fmt.Sprintf("Create event detected for federation '%s'", federation.GetNamespacedName()))
+		reconcile = r.PredictFederationCreate(federation)
 	}
+	return reconcile
+}
+
+func (r *ReconcileOrganization) PredictOrganizationCreate(organization *current.Organization) bool {
+	update := Update{}
+	if organization.HasType() {
+		log.Info(fmt.Sprintf("Operator restart detected, running update flow on existing organization '%s'", organization.GetNamespacedName()))
+
+		cm, err := r.GetSpecState(organization)
+		if err != nil {
+			log.Info(fmt.Sprintf("Failed getting saved organization spec '%s', triggering create: %s", organization.GetNamespacedName(), err.Error()))
+			return true
+		}
+
+		specBytes := cm.BinaryData["spec"]
+		existingOrg := &current.Organization{}
+		err = yaml.Unmarshal(specBytes, &existingOrg.Spec)
+		if err != nil {
+			log.Info(fmt.Sprintf("Unmarshal failed for saved organization spec '%s', triggering create: %s", organization.GetNamespacedName(), err.Error()))
+			return true
+		}
+
+		diff := deep.Equal(organization.Spec, existingOrg.Spec)
+		if diff != nil {
+			log.Info(fmt.Sprintf("Organization '%s' spec was updated while operator was down", organization.GetNamespacedName()))
+			log.Info(fmt.Sprintf("Difference detected: %s", diff))
+			update.specUpdated = true
+		}
+		if organization.Spec.Admin != existingOrg.Spec.Admin || organization.Spec.CAReference.Name != existingOrg.Spec.CAReference.Name {
+			update.adminOrCAUpdated = true
+		}
+		r.PushUpdate(organization.GetNamespacedName(), update)
+		return true
+	}
+
+	update.adminOrCAUpdated = true
+	r.PushUpdate(organization.GetNamespacedName(), update)
 	return true
 }
 
+func (r *ReconcileOrganization) PredictFederationCreate(federation *current.Federation) bool {
+	var err error
+
+	for _, m := range federation.Spec.Members {
+		err = r.AddFed(m, federation)
+		if err != nil {
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", m.NamespacedName(), federation.GetNamespacedName()))
+		}
+	}
+
+	return false
+}
+
 func (r *ReconcileOrganization) UpdateFunc(e event.UpdateEvent) bool {
-	update := Update{}
+	var reconcile bool
 
 	switch e.ObjectOld.(type) {
 	case *current.Organization:
 		oldOrg := e.ObjectOld.(*current.Organization)
 		newOrg := e.ObjectNew.(*current.Organization)
-		log.Info(fmt.Sprintf("Update event detected for organization '%s'", oldOrg.GetName()))
+		log.Info(fmt.Sprintf("Update event detected for organization '%s'", oldOrg.GetNamespacedName()))
 
-		if reflect.DeepEqual(oldOrg.Spec, newOrg.Spec) {
-			return false
-		}
-		if oldOrg.Spec.Admin != newOrg.Spec.Admin || oldOrg.Spec.CAReference.Name != newOrg.Spec.CAReference.Name {
-			update.adminOrCAUpdated = true
-		}
-		r.PushUpdate(oldOrg.GetName(), update)
+		reconcile = r.PredictOrganizationUpdate(oldOrg, newOrg)
 
-		log.Info(fmt.Sprintf("Spec update triggering reconcile on Organization custom resource %s: update [ %+v ]", oldOrg.Name, update.GetUpdateStackWithTrues()))
-	case *corev1.Secret:
+	case *current.Federation:
+		oldFed := e.ObjectOld.(*current.Federation)
+		newFed := e.ObjectNew.(*current.Federation)
+		log.Info(fmt.Sprintf("Update event detected for fedeartion '%s'", oldFed.GetNamespacedName()))
 
-	case *corev1.ConfigMap:
+		reconcile = r.PredictFederationUpdate(oldFed, newFed)
+
+	}
+	return reconcile
+}
+
+func (r *ReconcileOrganization) PredictOrganizationUpdate(oldOrg *current.Organization, newOrg *current.Organization) bool {
+	update := Update{}
+
+	if reflect.DeepEqual(oldOrg.Spec, newOrg.Spec) {
 		return false
 	}
+
+	if oldOrg.Spec.Admin != newOrg.Spec.Admin || oldOrg.Spec.CAReference.Name != newOrg.Spec.CAReference.Name {
+		update.adminOrCAUpdated = true
+	}
+
+	r.PushUpdate(oldOrg.GetNamespacedName(), update)
+
+	log.Info(fmt.Sprintf("Spec update triggering reconcile on Organization custom resource %s: update [ %+v ]", oldOrg.Name, update.GetUpdateStackWithTrues()))
+
 	return true
 }
 
-// GetUpdateStatus with index 0
-func (r *ReconcileOrganization) GetUpdateStatus(instance *current.Organization) *Update {
-	return r.GetUpdateStatusAtElement(instance, 0)
-}
+func (r *ReconcileOrganization) PredictFederationUpdate(oldFed *current.Federation, newFed *current.Federation) bool {
+	var err error
 
-func (r *ReconcileOrganization) GetUpdateStatusAtElement(instance *current.Organization, index int) *Update {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+	oldMembers := oldFed.Spec.Members
+	newMembers := newFed.Spec.Members
 
-	update := Update{}
-	_, ok := r.update[instance.GetName()]
-	if !ok {
-		return &update
-	}
+	added, removed := current.DifferMembers(oldMembers, newMembers)
 
-	if len(r.update[instance.GetName()]) >= 1 {
-		update = r.update[instance.GetName()][index]
-	}
-
-	return &update
-}
-
-func (r *ReconcileOrganization) PushUpdate(instance string, update Update) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	r.update[instance] = AppendUpdateIfMissing(r.update[instance], update)
-}
-
-func (r *ReconcileOrganization) PopUpdate(instance string) *Update {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	update := Update{}
-	if len(r.update[instance]) >= 1 {
-		update = r.update[instance][0]
-		if len(r.update[instance]) == 1 {
-			r.update[instance] = []Update{}
-		} else {
-			r.update[instance] = r.update[instance][1:]
+	for _, am := range added {
+		err = r.AddFed(am, newFed)
+		if err != nil {
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", am.NamespacedName(), newFed.GetNamespacedName()))
 		}
 	}
 
-	return &update
-}
-
-func AppendUpdateIfMissing(updates []Update, update Update) []Update {
-	for _, u := range updates {
-		if u == update {
-			return updates
+	for _, rm := range removed {
+		err = r.DeleteFed(rm, newFed)
+		if err != nil {
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", rm.NamespacedName(), newFed.GetNamespacedName()))
 		}
 	}
-	return append(updates, update)
+
+	return false
 }
 
-func GetUpdateStack(allUpdates map[string][]Update) string {
-	stack := ""
+func (r *ReconcileOrganization) DeleteFunc(e event.DeleteEvent) bool {
+	var reconcile bool
+	switch e.Object.(type) {
+	case *current.Federation:
+		// TODO: federaion delete ,then remove this fed from its fed list
+		federation := e.Object.(*current.Federation)
+		log.Info(fmt.Sprintf("Delete event detected for federation '%s'", federation.GetNamespacedName()))
+		reconcile = r.PredictFederationDelete(federation)
+	}
+	return reconcile
+}
 
-	for orderer, updates := range allUpdates {
-		currentStack := ""
-		for index, update := range updates {
-			currentStack += fmt.Sprintf("{ %s}", update.GetUpdateStackWithTrues())
-			if index != len(updates)-1 {
-				currentStack += " , "
-			}
+func (r *ReconcileOrganization) PredictFederationDelete(federation *current.Federation) bool {
+	var err error
+
+	for _, m := range federation.Spec.Members {
+		err = r.DeleteFed(m, federation)
+		if err != nil {
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", m.NamespacedName(), federation.GetNamespacedName()))
 		}
-		stack += fmt.Sprintf("%s: [ %s ] ", orderer, currentStack)
 	}
 
-	return stack
+	return false
+}
+
+func (r *ReconcileOrganization) AddFed(m current.Member, federation *current.Federation) error {
+	var err error
+	organization := &current.Organization{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      m.Name,
+		Namespace: m.Namespace,
+	}, organization)
+	if err != nil {
+		return err
+	}
+
+	conflict := organization.Status.AddFederation(current.NamespacedName{
+		Name:      federation.Name,
+		Namespace: federation.Namespace,
+	})
+	// conflict detected,do not need to PatchStatus
+	if conflict {
+		return errors.Errorf("federation %s already exist in organization %s", federation.GetNamespacedName(), m.NamespacedName())
+	}
+
+	err = r.client.PatchStatus(context.TODO(), organization, nil, k8sclient.PatchOption{
+		Resilient: &k8sclient.ResilientPatch{
+			Retry:    2,
+			Into:     &current.Organization{},
+			Strategy: client.MergeFrom,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ReconcileOrganization) DeleteFed(m current.Member, federation *current.Federation) error {
+	var err error
+
+	organization := &current.Organization{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      m.Name,
+		Namespace: m.Namespace,
+	}, organization)
+	if err != nil {
+		return err
+	}
+
+	exist := organization.Status.DeleteFederation(current.NamespacedName{
+		Name:      federation.Name,
+		Namespace: federation.Namespace,
+	})
+
+	// federation do not exist in this organization ,do not need to PatchStatus
+	if !exist {
+		return errors.Errorf("federation %s not exist in organization %s", federation.GetNamespacedName(), m.NamespacedName())
+	}
+
+	err = r.client.PatchStatus(context.TODO(), organization, nil, k8sclient.PatchOption{
+		Resilient: &k8sclient.ResilientPatch{
+			Retry:    2,
+			Into:     &current.Organization{},
+			Strategy: client.MergeFrom,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

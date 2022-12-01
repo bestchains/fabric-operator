@@ -57,3 +57,7 @@ func (e *Enrollment) GetCATLSBytes() ([]byte, error) {
 	}
 	return nil, errors.New("no CA TLS certificate set")
 }
+
+func (nsn *NamespacedName) String() string {
+	return nsn.Namespace + "-" + nsn.Name
+}

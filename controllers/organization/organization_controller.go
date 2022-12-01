@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
@@ -50,6 +51,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -97,6 +99,7 @@ func add(mgr manager.Manager, r *ReconcileOrganization) error {
 	predicateFuncs := predicate.Funcs{
 		CreateFunc: r.CreateFunc,
 		UpdateFunc: r.UpdateFunc,
+		DeleteFunc: r.DeleteFunc,
 	}
 
 	c, err := controller.New("organization-controller", mgr, controller.Options{Reconciler: r})
@@ -111,7 +114,7 @@ func add(mgr manager.Manager, r *ReconcileOrganization) error {
 	}
 
 	// Watch for changes to secrets
-	err = c.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForObject{}, predicateFuncs)
+	err = c.Watch(&source.Kind{Type: &current.Federation{}}, &handler.EnqueueRequestForObject{}, predicateFuncs)
 	if err != nil {
 		return err
 	}
@@ -178,14 +181,14 @@ func (r *ReconcileOrganization) Reconcile(ctx context.Context, request reconcile
 	}
 
 	update := r.GetUpdateStatus(instance)
-	reqLogger.Info(fmt.Sprintf("Reconciling Organization '%s' with update values of [ %+v ]", instance.GetName(), update.GetUpdateStackWithTrues()))
+	reqLogger.Info(fmt.Sprintf("Reconciling Organization '%s' with update values of [ %+v ]", instance.GetNamespacedName(), update.GetUpdateStackWithTrues()))
 
-	result, err := r.Offering.Reconcile(instance, r.PopUpdate(instance.GetName()))
+	result, err := r.Offering.Reconcile(instance, r.PopUpdate(instance.GetNamespacedName()))
 	if err != nil {
 		if setStatuErr := r.SetErrorStatus(instance, err); setStatuErr != nil {
 			return reconcile.Result{}, operatorerrors.IsBreakingError(setStatuErr, "failed to update status", log)
 		}
-		return reconcile.Result{}, operatorerrors.IsBreakingError(errors.Wrapf(err, "Organization instance '%s' encountered error", instance.GetName()), "stopping reconcile loop", log)
+		return reconcile.Result{}, operatorerrors.IsBreakingError(errors.Wrapf(err, "Organization instance '%s' encountered error", instance.GetNamespacedName()), "stopping reconcile loop", log)
 	} else {
 		setStatusErr := r.SetStatus(instance, result.Status)
 		if setStatusErr != nil {
@@ -194,16 +197,16 @@ func (r *ReconcileOrganization) Reconcile(ctx context.Context, request reconcile
 	}
 
 	if result.Requeue {
-		r.PushUpdate(instance.GetName(), *update)
+		r.PushUpdate(instance.GetNamespacedName(), *update)
 	}
 
-	reqLogger.Info(fmt.Sprintf("Finished reconciling Organization '%s' with update values of [ %+v ]", instance.GetName(), update.GetUpdateStackWithTrues()))
+	reqLogger.Info(fmt.Sprintf("Finished reconciling Organization '%s' with update values of [ %+v ]", instance.GetNamespacedName(), update.GetUpdateStackWithTrues()))
 
 	// If the stack still has items that require processing, keep reconciling
 	// until the stack has been cleared
-	_, found := r.update[instance.GetName()]
+	_, found := r.update[instance.GetNamespacedName()]
 	if found {
-		if len(r.update[instance.GetName()]) > 0 {
+		if len(r.update[instance.GetNamespacedName()]) > 0 {
 			return reconcile.Result{
 				Requeue: true,
 			}, nil
@@ -215,11 +218,15 @@ func (r *ReconcileOrganization) Reconcile(ctx context.Context, request reconcile
 
 // TODO: OrganizationStatus relevant
 func (r *ReconcileOrganization) SetStatus(instance *current.Organization, reconcileStatus *current.CRStatus) error {
-	log.Info(fmt.Sprintf("Setting status for '%s'", instance.GetName()))
+	log.Info(fmt.Sprintf("Setting status for '%s'", instance.GetNamespacedName()))
 
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}, instance)
 	if err != nil {
 		return err
+	}
+
+	if err = r.SaveSpecState(instance); err != nil {
+		return errors.Wrap(err, "failed to save spec state")
 	}
 
 	status := instance.Status.CRStatus
@@ -258,7 +265,13 @@ func (r *ReconcileOrganization) SetStatus(instance *current.Organization, reconc
 }
 
 func (r *ReconcileOrganization) SetErrorStatus(instance *current.Organization, reconcileErr error) error {
-	log.Info(fmt.Sprintf("Setting error status for '%s'", instance.GetName()))
+	log.Info(fmt.Sprintf("Setting error status for '%s'", instance.GetNamespacedName()))
+
+	var err error
+
+	if err = r.SaveSpecState(instance); err != nil {
+		return errors.Wrap(err, "failed to save spec state")
+	}
 
 	status := instance.Status.CRStatus
 	status.Type = current.Error
@@ -273,7 +286,7 @@ func (r *ReconcileOrganization) SetErrorStatus(instance *current.Organization, r
 	}
 
 	log.Info(fmt.Sprintf("Updating status of Organization custom resource to %s phase", instance.Status.Type))
-	if err := r.client.PatchStatus(context.TODO(), instance, nil, k8sclient.PatchOption{
+	if err = r.client.PatchStatus(context.TODO(), instance, nil, k8sclient.PatchOption{
 		Resilient: &k8sclient.ResilientPatch{
 			Retry:    2,
 			Into:     &current.Organization{},
@@ -285,4 +298,47 @@ func (r *ReconcileOrganization) SetErrorStatus(instance *current.Organization, r
 
 	return nil
 
+}
+
+func (r *ReconcileOrganization) SaveSpecState(instance *current.Organization) error {
+	data, err := yaml.Marshal(instance.Spec)
+	if err != nil {
+		return err
+	}
+
+	cm := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-spec", instance.GetName()),
+			Namespace: instance.GetNamespace(),
+			Labels:    instance.GetLabels(),
+		},
+		BinaryData: map[string][]byte{
+			"spec": data,
+		},
+	}
+
+	err = r.client.CreateOrUpdate(context.TODO(), cm, k8sclient.CreateOrUpdateOption{
+		Owner:  instance,
+		Scheme: r.scheme,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ReconcileOrganization) GetSpecState(instance *current.Organization) (*corev1.ConfigMap, error) {
+	cm := &corev1.ConfigMap{}
+	nn := types.NamespacedName{
+		Name:      fmt.Sprintf("%s-spec", instance.GetName()),
+		Namespace: instance.GetNamespace(),
+	}
+
+	err := r.client.Get(context.TODO(), nn, cm)
+	if err != nil {
+		return nil, err
+	}
+
+	return cm, nil
 }

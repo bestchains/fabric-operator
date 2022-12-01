@@ -41,8 +41,7 @@ spec:
                 type: string
               adminSecret:
                 description: AdminSecret (Optional,k8s secret) stores the `Admin`'s
-                  enrollmentID and enrollmentSecret Will be {Organization.Name}-admin-secret
-                  by default
+                  crypto materials Will be {Organization.Name}-admin-secret by default
                 type: string
               caReference:
                 description: CAReference reference to Organization's Certificate Authority
@@ -79,6 +78,16 @@ spec:
               errorcode:
                 description: ErrorCode is the code of classification of errors
                 type: integer
+              federations:
+                description: Federations which this organization has been added
+                items:
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  type: object
+                type: array
               lastHeartbeatTime:
                 description: LastHeartbeatTime is when the controller reconciled this
                   component

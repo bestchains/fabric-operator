@@ -7,6 +7,7 @@ resources:
 - bases/ibp.com_ibporderers.yaml
 - bases/ibp.com_ibpconsoles.yaml
 - bases/ibp.com_organizations.yaml
+- bases/ibp.com_federations.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
@@ -17,6 +18,7 @@ patchesStrategicMerge:
 #- patches/webhook_in_ibporderers.yaml
 #- patches/webhook_in_ibpconsoles.yaml
 #- patches/webhook_in_organizations.yaml
+#- patches/webhook_in_federations.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
@@ -26,6 +28,7 @@ patchesStrategicMerge:
 #- patches/cainjection_in_ibporderers.yaml
 #- patches/cainjection_in_ibpconsoles.yaml
 #- patches/cainjection_in_organizations.yaml
+#- patches/cainjection_in_federations.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # the following config is for teaching kustomize how to do kustomization for CRDs.

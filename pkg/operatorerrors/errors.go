@@ -25,63 +25,73 @@ import (
 )
 
 const (
-	InvalidDeploymentCreateRequest     = 1
-	InvalidDeploymentUpdateRequest     = 2
-	InvalidServiceCreateRequest        = 3
-	InvalidServiceUpdateRequest        = 4
-	InvalidPVCCreateRequest            = 5
-	InvalidPVCUpdateRequest            = 6
-	InvalidConfigMapCreateRequest      = 7
-	InvalidConfigMapUpdateRequest      = 8
-	InvalidServiceAccountCreateRequest = 9
-	InvalidServiceAccountUpdateRequest = 10
-	InvalidRoleCreateRequest           = 11
-	InvalidRoleUpdateRequest           = 12
-	InvalidRoleBindingCreateRequest    = 13
-	InvalidRoleBindingUpdateRequest    = 14
-	InvalidPeerInitSpec                = 15
-	InvalidOrdererType                 = 16
-	InvalidOrdererNodeCreateRequest    = 17
-	InvalidOrdererNodeUpdateRequest    = 18
-	InvalidOrdererInitSpec             = 19
-	CAInitilizationFailed              = 20
-	OrdererInitilizationFailed         = 21
-	PeerInitilizationFailed            = 22
-	MigrationFailed                    = 23
-	FabricPeerMigrationFailed          = 24
-	FabricOrdererMigrationFailed       = 25
-	InvalidCustomResourceCreateRequest = 26
-	FabricCAMigrationFailed            = 27
-	OrganizationInitilizationFailed    = 32
+	InvalidDeploymentCreateRequest = iota + 1
+	InvalidDeploymentUpdateRequest
+	InvalidServiceCreateRequest
+	InvalidServiceUpdateRequest
+	InvalidPVCCreateRequest
+	InvalidPVCUpdateRequest
+	InvalidConfigMapCreateRequest
+	InvalidConfigMapUpdateRequest
+	InvalidServiceAccountCreateRequest
+	InvalidServiceAccountUpdateRequest
+	InvalidRoleCreateRequest
+	InvalidRoleUpdateRequest
+	InvalidRoleBindingCreateRequest
+	InvalidRoleBindingUpdateRequest
+	InvalidPeerInitSpec
+	InvalidOrdererType
+	InvalidOrdererNodeCreateRequest
+	InvalidOrdererNodeUpdateRequest
+	InvalidOrdererInitSpec
+	CAInitilizationFailed
+	OrdererInitilizationFailed
+	PeerInitilizationFailed
+	MigrationFailed
+	FabricPeerMigrationFailed
+	FabricOrdererMigrationFailed
+	InvalidCustomResourceCreateRequest
+	FabricCAMigrationFailed
+	OrganizationInitilizationFailed
+	FederationInitilizationFailed
+	InvalidClusterRoleCreateRequest
+	InvalidClusterRoleUpdateRequest
+	InvalidClusterRoleBindingCreateRequest
+	InvalidClusterRoleBindingUpdateRequest
 )
 
 var (
 	BreakingErrors = map[int]*struct{}{
-		InvalidDeploymentCreateRequest:     nil,
-		InvalidDeploymentUpdateRequest:     nil,
-		InvalidServiceCreateRequest:        nil,
-		InvalidServiceUpdateRequest:        nil,
-		InvalidPVCCreateRequest:            nil,
-		InvalidPVCUpdateRequest:            nil,
-		InvalidConfigMapCreateRequest:      nil,
-		InvalidConfigMapUpdateRequest:      nil,
-		InvalidServiceAccountCreateRequest: nil,
-		InvalidServiceAccountUpdateRequest: nil,
-		InvalidRoleCreateRequest:           nil,
-		InvalidRoleUpdateRequest:           nil,
-		InvalidRoleBindingCreateRequest:    nil,
-		InvalidRoleBindingUpdateRequest:    nil,
-		InvalidPeerInitSpec:                nil,
-		InvalidOrdererType:                 nil,
-		InvalidOrdererInitSpec:             nil,
-		CAInitilizationFailed:              nil,
-		OrdererInitilizationFailed:         nil,
-		PeerInitilizationFailed:            nil,
-		FabricPeerMigrationFailed:          nil,
-		FabricOrdererMigrationFailed:       nil,
-		InvalidCustomResourceCreateRequest: nil,
-		FabricCAMigrationFailed:            nil,
-		OrganizationInitilizationFailed:    nil,
+		InvalidDeploymentCreateRequest:         nil,
+		InvalidDeploymentUpdateRequest:         nil,
+		InvalidServiceCreateRequest:            nil,
+		InvalidServiceUpdateRequest:            nil,
+		InvalidPVCCreateRequest:                nil,
+		InvalidPVCUpdateRequest:                nil,
+		InvalidConfigMapCreateRequest:          nil,
+		InvalidConfigMapUpdateRequest:          nil,
+		InvalidServiceAccountCreateRequest:     nil,
+		InvalidServiceAccountUpdateRequest:     nil,
+		InvalidRoleCreateRequest:               nil,
+		InvalidRoleUpdateRequest:               nil,
+		InvalidRoleBindingCreateRequest:        nil,
+		InvalidRoleBindingUpdateRequest:        nil,
+		InvalidPeerInitSpec:                    nil,
+		InvalidOrdererType:                     nil,
+		InvalidOrdererInitSpec:                 nil,
+		CAInitilizationFailed:                  nil,
+		OrdererInitilizationFailed:             nil,
+		PeerInitilizationFailed:                nil,
+		FabricPeerMigrationFailed:              nil,
+		FabricOrdererMigrationFailed:           nil,
+		InvalidCustomResourceCreateRequest:     nil,
+		FabricCAMigrationFailed:                nil,
+		OrganizationInitilizationFailed:        nil,
+		FederationInitilizationFailed:          nil,
+		InvalidClusterRoleCreateRequest:        nil,
+		InvalidClusterRoleUpdateRequest:        nil,
+		InvalidClusterRoleBindingCreateRequest: nil,
+		InvalidClusterRoleBindingUpdateRequest: nil,
 	}
 )
 

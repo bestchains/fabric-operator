@@ -24,9 +24,12 @@ import (
 
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
 	"github.com/IBM-Blockchain/fabric-operator/controllers/mocks"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/k8s/controllerclient"
 	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -42,7 +45,7 @@ var _ = Describe("predicates", func() {
 		oldOrg, newOrg *current.Organization
 	)
 
-	Context("create func predict", func() {
+	Context("Predict create event on organization", func() {
 		var (
 			e event.CreateEvent
 		)
@@ -67,7 +70,7 @@ var _ = Describe("predicates", func() {
 			}
 
 			e = event.CreateEvent{
-				Object: newOrg,
+				Object: oldOrg,
 			}
 
 			client = &mocks.Client{
@@ -113,7 +116,7 @@ var _ = Describe("predicates", func() {
 			create := reconciler.CreateFunc(e)
 			Expect(create).To(Equal(true))
 
-			Expect(reconciler.GetUpdateStatus(newOrg)).To(Equal(&Update{
+			Expect(reconciler.GetUpdateStatus(oldOrg)).To(Equal(&Update{
 				adminOrCAUpdated: true,
 			}))
 		})
@@ -158,7 +161,7 @@ var _ = Describe("predicates", func() {
 			}))
 		})
 	})
-	Context("update func predict", func() {
+	Context("Predict update event on organization", func() {
 		var (
 			e event.UpdateEvent
 		)
@@ -203,4 +206,182 @@ var _ = Describe("predicates", func() {
 			Expect(reconciler.GetUpdateStatus(newOrg).AdminOrCAUpdated()).To(Equal(true))
 		})
 	})
+
+	Context("Predict create/update/delete event on Federation", func() {
+		BeforeEach(func() {
+			client = &mocks.Client{}
+			reconciler = &ReconcileOrganization{
+				update: map[string][]Update{},
+				client: client,
+				mutex:  &sync.Mutex{},
+			}
+		})
+		federation := &current.Federation{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "federation-triple",
+				Namespace: "org1",
+			},
+			Spec: current.FederationSpec{
+				Members: []current.Member{
+					{Name: "org1", Namespace: "org1", Initiator: true},
+					{Name: "org2", Namespace: "org2", Initiator: false},
+				},
+			},
+		}
+
+		newFederation := &current.Federation{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "federation-triple",
+				Namespace: "org1",
+			},
+			Spec: current.FederationSpec{
+				Members: []current.Member{
+					{Name: "org1", Namespace: "org1", Initiator: true},
+					{Name: "org3", Namespace: "org3", Initiator: false},
+				},
+			},
+		}
+
+		It("create event: add federation to each member's status", func() {
+			e := event.CreateEvent{Object: federation}
+
+			reconcile := reconciler.CreateFunc(e)
+			Expect(reconcile).To(BeFalse())
+		})
+
+		It("create event: AddFed error when organizaiton not found", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				switch obj := o.(type) {
+				case *current.Organization:
+					if nn.Name == "org1" {
+						return k8serrors.NewNotFound(
+							schema.GroupResource{Group: "ibp.com", Resource: "organizations"},
+							"org1",
+						)
+					}
+					obj.Name = nn.Name
+					obj.Namespace = nn.Namespace
+				}
+				return nil
+			}
+
+			err := reconciler.AddFed(current.Member{Name: "org1"}, federation)
+			Expect(k8serrors.IsNotFound(err)).To(BeTrue())
+		})
+
+		It("create event: AddFed error when organization already has federation in its status.Federations ", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				switch obj := o.(type) {
+				case *current.Organization:
+					obj.Name = nn.Name
+					obj.Namespace = nn.Namespace
+
+					obj.Status.Federations = append(obj.Status.Federations, current.NamespacedName{
+						Name:      "federation-triple",
+						Namespace: "org1",
+					})
+				}
+				return nil
+			}
+
+			err := reconciler.AddFed(current.Member{Name: "org1"}, federation)
+			Expect(err.Error()).To(ContainSubstring("already exist in organization"))
+		})
+
+		It("create event: AddFed succ  ", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				switch obj := o.(type) {
+				case *current.Organization:
+					obj.Name = nn.Name
+					obj.Namespace = nn.Namespace
+				}
+				return nil
+			}
+			client.PatchStatusStub = func(ctx context.Context, o k8sclient.Object, p k8sclient.Patch, po ...controllerclient.PatchOption) error {
+				return nil
+			}
+
+			err := reconciler.AddFed(current.Member{Name: "org1"}, federation)
+			Expect(err).To(BeNil())
+		})
+
+		It("delete federation event", func() {
+			e := event.DeleteEvent{Object: federation}
+
+			reconcile := reconciler.DeleteFunc(e)
+			Expect(reconcile).To(BeFalse())
+		})
+
+		It("delete federation event: DeleteFed fails due to organizaiton not found", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				switch obj := o.(type) {
+				case *current.Organization:
+					if nn.Name == "org1" {
+						return k8serrors.NewNotFound(
+							schema.GroupResource{Group: "ibp.com", Resource: "organizations"},
+							"org1",
+						)
+					}
+					obj.Name = nn.Name
+					obj.Namespace = nn.Namespace
+				}
+				return nil
+			}
+
+			err := reconciler.DeleteFed(current.Member{Name: "org1"}, federation)
+			Expect(k8serrors.IsNotFound(err)).To(BeTrue())
+		})
+
+		It("delete fedeartion event: DeleteFed fails due to federation not exist in organization.status.federations", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				switch obj := o.(type) {
+				case *current.Organization:
+					obj.Name = nn.Name
+					obj.Namespace = nn.Namespace
+
+					obj.Status.Federations = []current.NamespacedName{}
+				}
+				return nil
+			}
+
+			err := reconciler.DeleteFed(current.Member{Name: "org1"}, federation)
+			Expect(err.Error()).To(ContainSubstring("not exist"))
+		})
+		It("delete fedeartion event: DeleteFed succ", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				switch obj := o.(type) {
+				case *current.Organization:
+					obj.Name = nn.Name
+					obj.Namespace = nn.Namespace
+
+					obj.Status.Federations = []current.NamespacedName{
+						{Name: "federation-triple", Namespace: "org1"},
+					}
+				}
+				return nil
+			}
+
+			err := reconciler.DeleteFed(current.Member{Name: "org1"}, federation)
+			Expect(err).To(BeNil())
+		})
+
+		It("update federation event: reconcile returns false", func() {
+			e := event.UpdateEvent{ObjectOld: federation, ObjectNew: newFederation}
+
+			reconcile := reconciler.UpdateFunc(e)
+			Expect(reconcile).To(BeFalse())
+		})
+
+		It("update fedeartion event: add/remove organiations", func() {
+			added, removed := current.DifferMembers(federation.GetMembers(), newFederation.GetMembers())
+			Expect(len(added)).To(Equal(1))
+			Expect(added[0].Name).To(Equal("org3"))
+
+			Expect(len(removed)).To(Equal(1))
+			Expect(removed[0].Name).To(Equal("org2"))
+
+		})
+
+	})
+
 })

@@ -44,7 +44,7 @@ type OrganizationSpec struct {
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
 	Admin string `json:"admin,omitempty"`
 
-	// AdminSecret (Optional,k8s secret) stores the `Admin`'s enrollmentID and enrollmentSecret
+	// AdminSecret (Optional,k8s secret) stores the `Admin`'s crypto materials
 	// Will be {Organization.Name}-admin-secret by default
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
 	AdminSecret string `json:"adminSecret,omitempty"`
@@ -56,7 +56,13 @@ type OrganizationSpec struct {
 
 // OrganizationStatus defines the observed state of Organization
 type OrganizationStatus struct {
+	// CRStatus is the custome resource status
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
 	CRStatus `json:",inline"`
+
+	// Federations which this organization has been added
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
+	Federations []NamespacedName `json:"federations,omitempty"`
 }
 
 //+kubebuilder:object:root=true

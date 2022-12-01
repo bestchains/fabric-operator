@@ -24,7 +24,7 @@ func (organization *Organization) GetLabels() map[string]string {
 }
 
 func (organization *Organization) GetNamespacedName() string {
-	return organization.GetName() + "-" + organization.GetNamespace()
+	return organization.GetNamespace() + "-" + organization.GetName()
 }
 
 func (organization *Organization) GetCAConnectinProfile() string {
@@ -64,4 +64,43 @@ func (organization *Organization) HasAdmin() bool {
 
 func (organization *Organization) HasType() bool {
 	return organization.Status.CRStatus.Type != ""
+}
+
+func (organizationStatus *OrganizationStatus) AddFederation(federation NamespacedName) bool {
+	var conflict bool
+
+	for _, f := range organizationStatus.Federations {
+		if f.String() == federation.String() {
+			conflict = true
+			break
+		}
+	}
+
+	if !conflict {
+		organizationStatus.Federations = append(organizationStatus.Federations, federation)
+	}
+
+	return conflict
+}
+
+func (organizationStatus *OrganizationStatus) DeleteFederation(federation NamespacedName) bool {
+	var exist bool
+	var index int
+
+	federations := organizationStatus.Federations
+
+	for curr, f := range federations {
+		if f.String() == federation.String() {
+			exist = true
+			index = curr
+			break
+		}
+	}
+
+	if exist {
+		organizationStatus.Federations = append(federations[:index], federations[index+1:]...)
+
+	}
+
+	return exist
 }

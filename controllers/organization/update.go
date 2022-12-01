@@ -18,9 +18,20 @@
 
 package organization
 
+import (
+	"fmt"
+
+	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
+)
+
 // Update defines a list of elements that we detect spec updates on
 type Update struct {
+	specUpdated      bool
 	adminOrCAUpdated bool
+}
+
+func (u *Update) SpecUpdated() bool {
+	return u.specUpdated
 }
 
 func (u *Update) AdminOrCAUpdated() bool {
@@ -31,12 +42,88 @@ func (u *Update) AdminOrCAUpdated() bool {
 func (u *Update) GetUpdateStackWithTrues() string {
 	stack := ""
 
+	if u.specUpdated {
+		stack += "specUpdated "
+	}
+
 	if u.AdminOrCAUpdated() {
 		stack += "adminOrCAUpdated "
 	}
 
 	if len(stack) == 0 {
 		stack = "emptystack "
+	}
+
+	return stack
+}
+
+// GetUpdateStatus with index 0
+func (r *ReconcileOrganization) GetUpdateStatus(instance *current.Organization) *Update {
+	return r.GetUpdateStatusAtElement(instance, 0)
+}
+
+func (r *ReconcileOrganization) GetUpdateStatusAtElement(instance *current.Organization, index int) *Update {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	update := Update{}
+	_, ok := r.update[instance.GetNamespacedName()]
+	if !ok {
+		return &update
+	}
+
+	if len(r.update[instance.GetNamespacedName()]) >= 1 {
+		update = r.update[instance.GetNamespacedName()][index]
+	}
+
+	return &update
+}
+
+func (r *ReconcileOrganization) PushUpdate(instance string, update Update) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	r.update[instance] = AppendUpdateIfMissing(r.update[instance], update)
+}
+
+func (r *ReconcileOrganization) PopUpdate(instance string) *Update {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	update := Update{}
+	if len(r.update[instance]) >= 1 {
+		update = r.update[instance][0]
+		if len(r.update[instance]) == 1 {
+			r.update[instance] = []Update{}
+		} else {
+			r.update[instance] = r.update[instance][1:]
+		}
+	}
+
+	return &update
+}
+
+func AppendUpdateIfMissing(updates []Update, update Update) []Update {
+	for _, u := range updates {
+		if u == update {
+			return updates
+		}
+	}
+	return append(updates, update)
+}
+
+func GetUpdateStack(allUpdates map[string][]Update) string {
+	stack := ""
+
+	for orderer, updates := range allUpdates {
+		currentStack := ""
+		for index, update := range updates {
+			currentStack += fmt.Sprintf("{ %s}", update.GetUpdateStackWithTrues())
+			if index != len(updates)-1 {
+				currentStack += " , "
+			}
+		}
+		stack += fmt.Sprintf("%s: [ %s ] ", orderer, currentStack)
 	}
 
 	return stack
