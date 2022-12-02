@@ -54,6 +54,15 @@ func (o *Override) CreateClusterRoleBinding(instance *current.Federation, crb *r
 
 	crb.Subjects = subjects
 
+	crb.OwnerReferences = []v1.OwnerReference{
+		{
+			Kind:       "Federation",
+			APIVersion: "ibp.com/v1beta1",
+			Name:       instance.GetName(),
+			UID:        instance.GetUID(),
+		},
+	}
+
 	return nil
 }
 
@@ -74,6 +83,15 @@ func (o *Override) UpdateClusterRoleBinding(instance *current.Federation, crb *r
 	}
 
 	crb.Subjects = subjects
+
+	crb.OwnerReferences = []v1.OwnerReference{
+		{
+			Kind:       "Federation",
+			APIVersion: "ibp.com/v1beta1",
+			Name:       instance.GetName(),
+			UID:        instance.GetUID(),
+		},
+	}
 
 	return nil
 }

@@ -151,11 +151,11 @@ func (federation *BaseFederation) ReconcileManagers(instance *current.Federation
 	var err error
 
 	// cluster role do not need to update
-	if err = federation.ClusterRoleManager.Reconcile(instance, false); err != nil {
+	if err = federation.ClusterRoleManager.Reconcile(instance, true); err != nil {
 		return errors.Wrap(err, "reconcile cluster role")
 	}
 
-	if err = federation.ClusterRoleBindingManager.Reconcile(instance, update.MemberUpdated()); err != nil {
+	if err = federation.ClusterRoleBindingManager.Reconcile(instance, true); err != nil {
 		return errors.Wrap(err, "reconcile cluster role binding")
 	}
 

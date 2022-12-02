@@ -47,6 +47,15 @@ func (o *Override) CreateClusterRole(instance *current.Federation, cr *rbacv1.Cl
 
 	cr.Rules = append(cr.Rules, rule)
 
+	cr.OwnerReferences = []v1.OwnerReference{
+		{
+			Kind:       "Federation",
+			APIVersion: "ibp.com/v1beta1",
+			Name:       instance.GetName(),
+			UID:        instance.GetUID(),
+		},
+	}
+
 	return nil
 }
 
@@ -60,6 +69,15 @@ func (o *Override) UpdateClusterRole(instance *current.Federation, cr *rbacv1.Cl
 	}
 
 	cr.Rules = append(cr.Rules, rule)
+
+	cr.OwnerReferences = []v1.OwnerReference{
+		{
+			Kind:       "Federation",
+			APIVersion: "ibp.com/v1beta1",
+			Name:       instance.GetName(),
+			UID:        instance.GetUID(),
+		},
+	}
 
 	return nil
 }
