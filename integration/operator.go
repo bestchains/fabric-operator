@@ -39,7 +39,7 @@ import (
 
 // GetOperatorConfig returns the operator configuration with the default templating files population
 // and with default versions set for components.
-func GetOperatorConfig(configs, caFiles, peerFiles, ordererFiles, consoleFiles string) *config.Config {
+func GetOperatorConfig(configs, caFiles, peerFiles, ordererFiles, consoleFiles, voteFiles string) *config.Config {
 	ulevel := uzap.NewAtomicLevelAt(2)
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		ulevel = uzap.NewAtomicLevelAt(-1)
@@ -102,6 +102,11 @@ func GetOperatorConfig(configs, caFiles, peerFiles, ordererFiles, consoleFiles s
 			Ingressv1beta1File: filepath.Join(ordererFiles, "ingressv1beta1.yaml"),
 			RouteFile:          filepath.Join(ordererFiles, "route.yaml"),
 			StoragePath:        "/tmp/ordererinit",
+		},
+		VoteConfig: &config.VoteConfig{
+			RoleFile:           filepath.Join(voteFiles, "role.yaml"),
+			RoleBindingFile:    filepath.Join(voteFiles, "rolebinding.yaml"),
+			ServiceAccountFile: filepath.Join(voteFiles, "serviceaccount.yaml"),
 		},
 		ConsoleInitConfig: &config.ConsoleConfig{
 			DeploymentFile:           filepath.Join(consoleFiles, "deployment.yaml"),

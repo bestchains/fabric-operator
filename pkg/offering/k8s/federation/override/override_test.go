@@ -62,9 +62,9 @@ var _ = Describe("K8S Federation Overrides", func() {
 			},
 			Spec: current.FederationSpec{
 				Members: []current.Member{
-					{Name: "org1", Namespace: "org1", Initiator: true},
-					{Name: "org2", Namespace: "org3", Initiator: false},
-					{Name: "org3", Namespace: "org3", Initiator: false},
+					{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
+					{NamespacedName: current.NamespacedName{Name: "org2", Namespace: "org2"}, Initiator: false},
+					{NamespacedName: current.NamespacedName{Name: "org3", Namespace: "org3"}, Initiator: false},
 				},
 			},
 		}

@@ -64,7 +64,7 @@ func (federation *Federation) Reconcile(instance *current.Federation, update bas
 		return common.Result{}, errors.Wrap(err, "failed to reconcile managers")
 	}
 
-	return federation.CheckStates(instance)
+	return federation.CheckStates(instance, update)
 }
 
 // TODO: customize for kubernetes
@@ -85,6 +85,6 @@ func (federation *Federation) ReconcileManagers(instance *current.Federation, up
 }
 
 // CheckStates on Federation after ReconcileManagers
-func (federation *Federation) CheckStates(instance *current.Federation) (common.Result, error) {
-	return federation.BaseFederation.CheckStates(instance)
+func (federation *Federation) CheckStates(instance *current.Federation, update basefed.Update) (common.Result, error) {
+	return federation.BaseFederation.CheckStates(instance, update)
 }

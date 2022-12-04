@@ -1,0 +1,14 @@
+---
+apiVersion: ibp.com/v1beta1
+kind: Proposal
+metadata:
+  name: create-federation-sample
+spec:
+  federation:
+    namespace: org1
+    name: federation-sample
+  policy: All
+  initiator:
+    namespace: org1
+    name: org1
+  createFederation: {}

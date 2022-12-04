@@ -9,6 +9,8 @@ resources:
 - bases/ibp.com_organizations.yaml
 - bases/ibp.com_federations.yaml
 - bases/ibp.com_networks.yaml
+- bases/ibp.com_proposals.yaml
+- bases/ibp.com_votes.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

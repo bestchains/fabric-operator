@@ -487,5 +487,6 @@ func getOperatorCfg() *config.Config {
 	defaultCADef := filepath.Join(defaultDef, "ca")
 	defaultOrdererDef := filepath.Join(defaultDef, "orderer")
 	defaultConsoleDef := filepath.Join(defaultDef, "console")
-	return GetOperatorConfig(defaultConfigs, defaultCADef, defaultPeerDef, defaultOrdererDef, defaultConsoleDef)
+	defaultVoteDef := filepath.Join(defaultDef, "vote")
+	return GetOperatorConfig(defaultConfigs, defaultCADef, defaultPeerDef, defaultOrdererDef, defaultConsoleDef, defaultVoteDef)
 }

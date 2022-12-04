@@ -223,8 +223,8 @@ var _ = Describe("predicates", func() {
 			},
 			Spec: current.FederationSpec{
 				Members: []current.Member{
-					{Name: "org1", Namespace: "org1", Initiator: true},
-					{Name: "org2", Namespace: "org2", Initiator: false},
+					{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
+					{NamespacedName: current.NamespacedName{Name: "org2", Namespace: "org2"}, Initiator: false},
 				},
 			},
 		}
@@ -236,8 +236,8 @@ var _ = Describe("predicates", func() {
 			},
 			Spec: current.FederationSpec{
 				Members: []current.Member{
-					{Name: "org1", Namespace: "org1", Initiator: true},
-					{Name: "org3", Namespace: "org3", Initiator: false},
+					{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
+					{NamespacedName: current.NamespacedName{Name: "org3", Namespace: "org3"}, Initiator: false},
 				},
 			},
 		}
@@ -265,7 +265,7 @@ var _ = Describe("predicates", func() {
 				return nil
 			}
 
-			err := reconciler.AddFed(current.Member{Name: "org1"}, federation)
+			err := reconciler.AddFed(current.Member{NamespacedName: current.NamespacedName{Name: "org1"}}, federation)
 			Expect(k8serrors.IsNotFound(err)).To(BeTrue())
 		})
 
@@ -284,7 +284,7 @@ var _ = Describe("predicates", func() {
 				return nil
 			}
 
-			err := reconciler.AddFed(current.Member{Name: "org1"}, federation)
+			err := reconciler.AddFed(current.Member{NamespacedName: current.NamespacedName{Name: "org1"}}, federation)
 			Expect(err.Error()).To(ContainSubstring("already exist in organization"))
 		})
 
@@ -301,7 +301,7 @@ var _ = Describe("predicates", func() {
 				return nil
 			}
 
-			err := reconciler.AddFed(current.Member{Name: "org1"}, federation)
+			err := reconciler.AddFed(current.Member{NamespacedName: current.NamespacedName{Name: "org1"}}, federation)
 			Expect(err).To(BeNil())
 		})
 
@@ -328,7 +328,7 @@ var _ = Describe("predicates", func() {
 				return nil
 			}
 
-			err := reconciler.DeleteFed(current.Member{Name: "org1"}, federation)
+			err := reconciler.DeleteFed(current.Member{NamespacedName: current.NamespacedName{Name: "org1"}}, federation)
 			Expect(k8serrors.IsNotFound(err)).To(BeTrue())
 		})
 
@@ -344,7 +344,7 @@ var _ = Describe("predicates", func() {
 				return nil
 			}
 
-			err := reconciler.DeleteFed(current.Member{Name: "org1"}, federation)
+			err := reconciler.DeleteFed(current.Member{NamespacedName: current.NamespacedName{Name: "org1"}}, federation)
 			Expect(err.Error()).To(ContainSubstring("not exist"))
 		})
 		It("delete fedeartion event: DeleteFed succ", func() {
@@ -361,7 +361,7 @@ var _ = Describe("predicates", func() {
 				return nil
 			}
 
-			err := reconciler.DeleteFed(current.Member{Name: "org1"}, federation)
+			err := reconciler.DeleteFed(current.Member{NamespacedName: current.NamespacedName{Name: "org1"}}, federation)
 			Expect(err).To(BeNil())
 		})
 

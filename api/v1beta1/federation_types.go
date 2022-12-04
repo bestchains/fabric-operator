@@ -47,9 +47,8 @@ type FederationSpec struct {
 // Member in a Fedeartion
 // +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
 type Member struct {
-	Name      string `json:"name,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
-	Initiator bool   `json:"initiator,omitempty"`
+	NamespacedName `json:",inline"`
+	Initiator      bool `json:"initiator,omitempty"`
 }
 
 // FederationStatus defines the observed state of Federation

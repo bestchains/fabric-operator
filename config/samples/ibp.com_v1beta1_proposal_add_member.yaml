@@ -1,0 +1,17 @@
+---
+apiVersion: ibp.com/v1beta1
+kind: Proposal
+metadata:
+  name: add-member-federation-sample
+spec:
+  federation:
+    namespace: org1
+    name: federation-sample
+  policy: All
+  initiator:
+    namespace: org1
+    name: org1
+  addMember:
+    members:
+    - namespace: org3
+      name: org3

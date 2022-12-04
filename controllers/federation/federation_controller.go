@@ -119,7 +119,10 @@ func add(mgr manager.Manager, r *ReconcileFederation) error {
 		return err
 	}
 
-	// TODO: watch Proposal
+	err = c.Watch(&source.Kind{Type: &current.Proposal{}}, &handler.EnqueueRequestForObject{}, predicateFuncs)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -167,6 +170,20 @@ func (r *ReconcileFederation) Reconcile(ctx context.Context, request reconcile.R
 	var err error
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 
+	if request.Namespace == "" {
+		// todo should add a flag
+		// this is proposal status update trigger federation reconcile
+		proposal := &current.Proposal{}
+		err = r.client.Get(context.TODO(), request.NamespacedName, proposal)
+		if err != nil {
+			if k8serrors.IsNotFound(err) {
+				return reconcile.Result{}, nil
+			}
+			return reconcile.Result{}, err
+		}
+		request.Namespace = proposal.Spec.Federation.Namespace
+		request.Name = proposal.Spec.Federation.Name
+	}
 	reqLogger.Info("Reconciling Federation")
 
 	instance := &current.Federation{}

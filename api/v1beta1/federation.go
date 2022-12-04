@@ -78,7 +78,7 @@ func (federation *Federation) HasMembers() bool {
 	return len(federation.Spec.Members) != 0
 }
 
-func (m *Member) NamespacedName() string {
+func (m *Member) GetNamespacedName() string {
 	return m.Namespace + "-" + m.Name
 }
 
@@ -86,19 +86,19 @@ func DifferMembers(old []Member, new []Member) (added []Member, removed []Member
 	// cache in map
 	oldMapper := make(map[string]Member, len(old))
 	for _, m := range old {
-		oldMapper[m.NamespacedName()] = m
+		oldMapper[m.GetNamespacedName()] = m
 	}
 
 	// calculate differences
 	for _, m := range new {
 
 		// added: in new ,but not in old
-		if _, ok := oldMapper[m.NamespacedName()]; !ok {
+		if _, ok := oldMapper[m.GetNamespacedName()]; !ok {
 			added = append(added, m)
 		}
 
 		// delete the intersection
-		delete(oldMapper, m.NamespacedName())
+		delete(oldMapper, m.GetNamespacedName())
 	}
 
 	for _, m := range oldMapper {

@@ -96,7 +96,7 @@ func (r *ReconcileOrganization) PredictFederationCreate(federation *current.Fede
 	for _, m := range federation.Spec.Members {
 		err = r.AddFed(m, federation)
 		if err != nil {
-			log.Error(err, fmt.Sprintf("Member %s in Federation %s", m.NamespacedName(), federation.GetNamespacedName()))
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", m.GetNamespacedName(), federation.GetNamespacedName()))
 		}
 	}
 
@@ -154,14 +154,14 @@ func (r *ReconcileOrganization) PredictFederationUpdate(oldFed *current.Federati
 	for _, am := range added {
 		err = r.AddFed(am, newFed)
 		if err != nil {
-			log.Error(err, fmt.Sprintf("Member %s in Federation %s", am.NamespacedName(), newFed.GetNamespacedName()))
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", am.GetNamespacedName(), newFed.GetNamespacedName()))
 		}
 	}
 
 	for _, rm := range removed {
 		err = r.DeleteFed(rm, newFed)
 		if err != nil {
-			log.Error(err, fmt.Sprintf("Member %s in Federation %s", rm.NamespacedName(), newFed.GetNamespacedName()))
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", rm.GetNamespacedName(), newFed.GetNamespacedName()))
 		}
 	}
 
@@ -185,7 +185,7 @@ func (r *ReconcileOrganization) PredictFederationDelete(federation *current.Fede
 	for _, m := range federation.Spec.Members {
 		err = r.DeleteFed(m, federation)
 		if err != nil {
-			log.Error(err, fmt.Sprintf("Member %s in Federation %s", m.NamespacedName(), federation.GetNamespacedName()))
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", m.GetNamespacedName(), federation.GetNamespacedName()))
 		}
 	}
 
@@ -209,7 +209,7 @@ func (r *ReconcileOrganization) AddFed(m current.Member, federation *current.Fed
 	})
 	// conflict detected,do not need to PatchStatus
 	if conflict {
-		return errors.Errorf("federation %s already exist in organization %s", federation.GetNamespacedName(), m.NamespacedName())
+		return errors.Errorf("federation %s already exist in organization %s", federation.GetNamespacedName(), m.GetNamespacedName())
 	}
 
 	err = r.client.PatchStatus(context.TODO(), organization, nil, k8sclient.PatchOption{
@@ -245,7 +245,7 @@ func (r *ReconcileOrganization) DeleteFed(m current.Member, federation *current.
 
 	// federation do not exist in this organization ,do not need to PatchStatus
 	if !exist {
-		return errors.Errorf("federation %s not exist in organization %s", federation.GetNamespacedName(), m.NamespacedName())
+		return errors.Errorf("federation %s not exist in organization %s", federation.GetNamespacedName(), m.GetNamespacedName())
 	}
 
 	err = r.client.PatchStatus(context.TODO(), organization, nil, k8sclient.PatchOption{

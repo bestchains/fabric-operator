@@ -1,0 +1,16 @@
+namespace: org0
+
+namePrefix:
+
+bases:
+  - ../base
+
+patches:
+- target:
+    kind: Organization
+    name: .*
+  patch: |-
+    - op: replace
+      path: /metadata/name
+      value: org0
+  

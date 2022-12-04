@@ -10,10 +10,11 @@ import (
 )
 
 type Federation struct {
-	CheckStatesStub        func(*v1beta1.Federation) (common.Result, error)
+	CheckStatesStub        func(*v1beta1.Federation, federation.Update) (common.Result, error)
 	checkStatesMutex       sync.RWMutex
 	checkStatesArgsForCall []struct {
 		arg1 *v1beta1.Federation
+		arg2 federation.Update
 	}
 	checkStatesReturns struct {
 		result1 common.Result
@@ -77,21 +78,23 @@ type Federation struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *Federation) CheckStates(arg1 *v1beta1.Federation) (common.Result, error) {
+func (fake *Federation) CheckStates(arg1 *v1beta1.Federation, arg2 federation.Update) (common.Result, error) {
 	fake.checkStatesMutex.Lock()
 	ret, specificReturn := fake.checkStatesReturnsOnCall[len(fake.checkStatesArgsForCall)]
 	fake.checkStatesArgsForCall = append(fake.checkStatesArgsForCall, struct {
 		arg1 *v1beta1.Federation
-	}{arg1})
-	fake.recordInvocation("CheckStates", []interface{}{arg1})
+		arg2 federation.Update
+	}{arg1, arg2})
+	stub := fake.CheckStatesStub
+	fakeReturns := fake.checkStatesReturns
+	fake.recordInvocation("CheckStates", []interface{}{arg1, arg2})
 	fake.checkStatesMutex.Unlock()
-	if fake.CheckStatesStub != nil {
-		return fake.CheckStatesStub(arg1)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.checkStatesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -101,17 +104,17 @@ func (fake *Federation) CheckStatesCallCount() int {
 	return len(fake.checkStatesArgsForCall)
 }
 
-func (fake *Federation) CheckStatesCalls(stub func(*v1beta1.Federation) (common.Result, error)) {
+func (fake *Federation) CheckStatesCalls(stub func(*v1beta1.Federation, federation.Update) (common.Result, error)) {
 	fake.checkStatesMutex.Lock()
 	defer fake.checkStatesMutex.Unlock()
 	fake.CheckStatesStub = stub
 }
 
-func (fake *Federation) CheckStatesArgsForCall(i int) *v1beta1.Federation {
+func (fake *Federation) CheckStatesArgsForCall(i int) (*v1beta1.Federation, federation.Update) {
 	fake.checkStatesMutex.RLock()
 	defer fake.checkStatesMutex.RUnlock()
 	argsForCall := fake.checkStatesArgsForCall[i]
-	return argsForCall.arg1
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *Federation) CheckStatesReturns(result1 common.Result, result2 error) {
@@ -147,15 +150,16 @@ func (fake *Federation) Initialize(arg1 *v1beta1.Federation, arg2 federation.Upd
 		arg1 *v1beta1.Federation
 		arg2 federation.Update
 	}{arg1, arg2})
+	stub := fake.InitializeStub
+	fakeReturns := fake.initializeReturns
 	fake.recordInvocation("Initialize", []interface{}{arg1, arg2})
 	fake.initializeMutex.Unlock()
-	if fake.InitializeStub != nil {
-		return fake.InitializeStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.initializeReturns
 	return fakeReturns.result1
 }
 
@@ -208,15 +212,16 @@ func (fake *Federation) PreReconcileChecks(arg1 *v1beta1.Federation, arg2 federa
 		arg1 *v1beta1.Federation
 		arg2 federation.Update
 	}{arg1, arg2})
+	stub := fake.PreReconcileChecksStub
+	fakeReturns := fake.preReconcileChecksReturns
 	fake.recordInvocation("PreReconcileChecks", []interface{}{arg1, arg2})
 	fake.preReconcileChecksMutex.Unlock()
-	if fake.PreReconcileChecksStub != nil {
-		return fake.PreReconcileChecksStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.preReconcileChecksReturns
 	return fakeReturns.result1
 }
 
@@ -269,15 +274,16 @@ func (fake *Federation) Reconcile(arg1 *v1beta1.Federation, arg2 federation.Upda
 		arg1 *v1beta1.Federation
 		arg2 federation.Update
 	}{arg1, arg2})
+	stub := fake.ReconcileStub
+	fakeReturns := fake.reconcileReturns
 	fake.recordInvocation("Reconcile", []interface{}{arg1, arg2})
 	fake.reconcileMutex.Unlock()
-	if fake.ReconcileStub != nil {
-		return fake.ReconcileStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.reconcileReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -333,15 +339,16 @@ func (fake *Federation) ReconcileManagers(arg1 *v1beta1.Federation, arg2 federat
 		arg1 *v1beta1.Federation
 		arg2 federation.Update
 	}{arg1, arg2})
+	stub := fake.ReconcileManagersStub
+	fakeReturns := fake.reconcileManagersReturns
 	fake.recordInvocation("ReconcileManagers", []interface{}{arg1, arg2})
 	fake.reconcileManagersMutex.Unlock()
-	if fake.ReconcileManagersStub != nil {
-		return fake.ReconcileManagersStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.reconcileManagersReturns
 	return fakeReturns.result1
 }
 

@@ -120,7 +120,7 @@ var _ = Describe("Orderernode manager", func() {
 		// 				NodeNumber: &num,
 		// 			},
 		// 		}
-		// 		mockKubeClient.GetStub = func(ctx context.Context, types types.NamespacedName, obj runtime.Object) error {
+		// 		mockKubeClient.GetStub = func(ctx context.Context, types types.GetNamespacedName, obj runtime.Object) error {
 		// 			switch obj.(type) {
 		// 			case *current.IBPOrderer:
 		// 				on := obj.(*current.IBPOrderer)

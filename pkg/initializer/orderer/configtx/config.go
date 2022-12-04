@@ -52,7 +52,7 @@ const (
 // TopLevel consists of the structs used by the configtxgen tool.
 type TopLevel struct {
 	Profiles      map[string]*Profile        `yaml:"Profiles"`
-	Organizations []*Organization            `yaml:"Organizations"`
+	Organizations []*Organization            `yaml:"Members"`
 	Channel       *Profile                   `yaml:"Channel"`
 	Application   *Application               `yaml:"Application"`
 	Orderer       *Orderer                   `yaml:"Orderer"`
@@ -80,13 +80,13 @@ type Policy struct {
 // Consortium represents a group of organizations which may create channels
 // with each other
 type Consortium struct {
-	Organizations []*Organization `yaml:"Organizations"`
+	Organizations []*Organization `yaml:"Members"`
 }
 
 // Application encodes the application-level configuration needed in config
 // transactions.
 type Application struct {
-	Organizations []*Organization    `yaml:"Organizations"`
+	Organizations []*Organization    `yaml:"Members"`
 	Capabilities  map[string]bool    `yaml:"Capabilities"`
 	Resources     *Resources         `yaml:"Resources"`
 	Policies      map[string]*Policy `yaml:"Policies"`
@@ -138,7 +138,7 @@ type Orderer struct {
 	BatchSize     BatchSize                `yaml:"BatchSize"`
 	Kafka         Kafka                    `yaml:"Kafka"`
 	EtcdRaft      *etcdraft.ConfigMetadata `yaml:"EtcdRaft"`
-	Organizations []*Organization          `yaml:"Organizations"`
+	Organizations []*Organization          `yaml:"Members"`
 	MaxChannels   uint64                   `yaml:"MaxChannels"`
 	Capabilities  map[string]bool          `yaml:"Capabilities"`
 	Policies      map[string]*Policy       `yaml:"Policies"`

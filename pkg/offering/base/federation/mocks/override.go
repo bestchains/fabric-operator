@@ -49,15 +49,16 @@ func (fake *Override) ClusterRole(arg1 v1.Object, arg2 *v1a.ClusterRole, arg3 re
 		arg2 *v1a.ClusterRole
 		arg3 resources.Action
 	}{arg1, arg2, arg3})
+	stub := fake.ClusterRoleStub
+	fakeReturns := fake.clusterRoleReturns
 	fake.recordInvocation("ClusterRole", []interface{}{arg1, arg2, arg3})
 	fake.clusterRoleMutex.Unlock()
-	if fake.ClusterRoleStub != nil {
-		return fake.ClusterRoleStub(arg1, arg2, arg3)
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.clusterRoleReturns
 	return fakeReturns.result1
 }
 
@@ -111,15 +112,16 @@ func (fake *Override) ClusterRoleBinding(arg1 v1.Object, arg2 *v1a.ClusterRoleBi
 		arg2 *v1a.ClusterRoleBinding
 		arg3 resources.Action
 	}{arg1, arg2, arg3})
+	stub := fake.ClusterRoleBindingStub
+	fakeReturns := fake.clusterRoleBindingReturns
 	fake.recordInvocation("ClusterRoleBinding", []interface{}{arg1, arg2, arg3})
 	fake.clusterRoleBindingMutex.Unlock()
-	if fake.ClusterRoleBindingStub != nil {
-		return fake.ClusterRoleBindingStub(arg1, arg2, arg3)
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.clusterRoleBindingReturns
 	return fakeReturns.result1
 }
 

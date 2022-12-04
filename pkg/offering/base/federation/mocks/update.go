@@ -18,6 +18,36 @@ type Update struct {
 	memberUpdatedReturnsOnCall map[int]struct {
 		result1 bool
 	}
+	ProposalActivatedStub        func() bool
+	proposalActivatedMutex       sync.RWMutex
+	proposalActivatedArgsForCall []struct {
+	}
+	proposalActivatedReturns struct {
+		result1 bool
+	}
+	proposalActivatedReturnsOnCall map[int]struct {
+		result1 bool
+	}
+	ProposalDissolvedStub        func() bool
+	proposalDissolvedMutex       sync.RWMutex
+	proposalDissolvedArgsForCall []struct {
+	}
+	proposalDissolvedReturns struct {
+		result1 bool
+	}
+	proposalDissolvedReturnsOnCall map[int]struct {
+		result1 bool
+	}
+	ProposalFailedStub        func() bool
+	proposalFailedMutex       sync.RWMutex
+	proposalFailedArgsForCall []struct {
+	}
+	proposalFailedReturns struct {
+		result1 bool
+	}
+	proposalFailedReturnsOnCall map[int]struct {
+		result1 bool
+	}
 	SpecUpdatedStub        func() bool
 	specUpdatedMutex       sync.RWMutex
 	specUpdatedArgsForCall []struct {
@@ -37,15 +67,16 @@ func (fake *Update) MemberUpdated() bool {
 	ret, specificReturn := fake.memberUpdatedReturnsOnCall[len(fake.memberUpdatedArgsForCall)]
 	fake.memberUpdatedArgsForCall = append(fake.memberUpdatedArgsForCall, struct {
 	}{})
+	stub := fake.MemberUpdatedStub
+	fakeReturns := fake.memberUpdatedReturns
 	fake.recordInvocation("MemberUpdated", []interface{}{})
 	fake.memberUpdatedMutex.Unlock()
-	if fake.MemberUpdatedStub != nil {
-		return fake.MemberUpdatedStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.memberUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -84,20 +115,180 @@ func (fake *Update) MemberUpdatedReturnsOnCall(i int, result1 bool) {
 	}{result1}
 }
 
+func (fake *Update) ProposalActivated() bool {
+	fake.proposalActivatedMutex.Lock()
+	ret, specificReturn := fake.proposalActivatedReturnsOnCall[len(fake.proposalActivatedArgsForCall)]
+	fake.proposalActivatedArgsForCall = append(fake.proposalActivatedArgsForCall, struct {
+	}{})
+	stub := fake.ProposalActivatedStub
+	fakeReturns := fake.proposalActivatedReturns
+	fake.recordInvocation("ProposalActivated", []interface{}{})
+	fake.proposalActivatedMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *Update) ProposalActivatedCallCount() int {
+	fake.proposalActivatedMutex.RLock()
+	defer fake.proposalActivatedMutex.RUnlock()
+	return len(fake.proposalActivatedArgsForCall)
+}
+
+func (fake *Update) ProposalActivatedCalls(stub func() bool) {
+	fake.proposalActivatedMutex.Lock()
+	defer fake.proposalActivatedMutex.Unlock()
+	fake.ProposalActivatedStub = stub
+}
+
+func (fake *Update) ProposalActivatedReturns(result1 bool) {
+	fake.proposalActivatedMutex.Lock()
+	defer fake.proposalActivatedMutex.Unlock()
+	fake.ProposalActivatedStub = nil
+	fake.proposalActivatedReturns = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *Update) ProposalActivatedReturnsOnCall(i int, result1 bool) {
+	fake.proposalActivatedMutex.Lock()
+	defer fake.proposalActivatedMutex.Unlock()
+	fake.ProposalActivatedStub = nil
+	if fake.proposalActivatedReturnsOnCall == nil {
+		fake.proposalActivatedReturnsOnCall = make(map[int]struct {
+			result1 bool
+		})
+	}
+	fake.proposalActivatedReturnsOnCall[i] = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *Update) ProposalDissolved() bool {
+	fake.proposalDissolvedMutex.Lock()
+	ret, specificReturn := fake.proposalDissolvedReturnsOnCall[len(fake.proposalDissolvedArgsForCall)]
+	fake.proposalDissolvedArgsForCall = append(fake.proposalDissolvedArgsForCall, struct {
+	}{})
+	stub := fake.ProposalDissolvedStub
+	fakeReturns := fake.proposalDissolvedReturns
+	fake.recordInvocation("ProposalDissolved", []interface{}{})
+	fake.proposalDissolvedMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *Update) ProposalDissolvedCallCount() int {
+	fake.proposalDissolvedMutex.RLock()
+	defer fake.proposalDissolvedMutex.RUnlock()
+	return len(fake.proposalDissolvedArgsForCall)
+}
+
+func (fake *Update) ProposalDissolvedCalls(stub func() bool) {
+	fake.proposalDissolvedMutex.Lock()
+	defer fake.proposalDissolvedMutex.Unlock()
+	fake.ProposalDissolvedStub = stub
+}
+
+func (fake *Update) ProposalDissolvedReturns(result1 bool) {
+	fake.proposalDissolvedMutex.Lock()
+	defer fake.proposalDissolvedMutex.Unlock()
+	fake.ProposalDissolvedStub = nil
+	fake.proposalDissolvedReturns = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *Update) ProposalDissolvedReturnsOnCall(i int, result1 bool) {
+	fake.proposalDissolvedMutex.Lock()
+	defer fake.proposalDissolvedMutex.Unlock()
+	fake.ProposalDissolvedStub = nil
+	if fake.proposalDissolvedReturnsOnCall == nil {
+		fake.proposalDissolvedReturnsOnCall = make(map[int]struct {
+			result1 bool
+		})
+	}
+	fake.proposalDissolvedReturnsOnCall[i] = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *Update) ProposalFailed() bool {
+	fake.proposalFailedMutex.Lock()
+	ret, specificReturn := fake.proposalFailedReturnsOnCall[len(fake.proposalFailedArgsForCall)]
+	fake.proposalFailedArgsForCall = append(fake.proposalFailedArgsForCall, struct {
+	}{})
+	stub := fake.ProposalFailedStub
+	fakeReturns := fake.proposalFailedReturns
+	fake.recordInvocation("ProposalFailed", []interface{}{})
+	fake.proposalFailedMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *Update) ProposalFailedCallCount() int {
+	fake.proposalFailedMutex.RLock()
+	defer fake.proposalFailedMutex.RUnlock()
+	return len(fake.proposalFailedArgsForCall)
+}
+
+func (fake *Update) ProposalFailedCalls(stub func() bool) {
+	fake.proposalFailedMutex.Lock()
+	defer fake.proposalFailedMutex.Unlock()
+	fake.ProposalFailedStub = stub
+}
+
+func (fake *Update) ProposalFailedReturns(result1 bool) {
+	fake.proposalFailedMutex.Lock()
+	defer fake.proposalFailedMutex.Unlock()
+	fake.ProposalFailedStub = nil
+	fake.proposalFailedReturns = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *Update) ProposalFailedReturnsOnCall(i int, result1 bool) {
+	fake.proposalFailedMutex.Lock()
+	defer fake.proposalFailedMutex.Unlock()
+	fake.ProposalFailedStub = nil
+	if fake.proposalFailedReturnsOnCall == nil {
+		fake.proposalFailedReturnsOnCall = make(map[int]struct {
+			result1 bool
+		})
+	}
+	fake.proposalFailedReturnsOnCall[i] = struct {
+		result1 bool
+	}{result1}
+}
+
 func (fake *Update) SpecUpdated() bool {
 	fake.specUpdatedMutex.Lock()
 	ret, specificReturn := fake.specUpdatedReturnsOnCall[len(fake.specUpdatedArgsForCall)]
 	fake.specUpdatedArgsForCall = append(fake.specUpdatedArgsForCall, struct {
 	}{})
+	stub := fake.SpecUpdatedStub
+	fakeReturns := fake.specUpdatedReturns
 	fake.recordInvocation("SpecUpdated", []interface{}{})
 	fake.specUpdatedMutex.Unlock()
-	if fake.SpecUpdatedStub != nil {
-		return fake.SpecUpdatedStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.specUpdatedReturns
 	return fakeReturns.result1
 }
 
@@ -141,6 +332,12 @@ func (fake *Update) Invocations() map[string][][]interface{} {
 	defer fake.invocationsMutex.RUnlock()
 	fake.memberUpdatedMutex.RLock()
 	defer fake.memberUpdatedMutex.RUnlock()
+	fake.proposalActivatedMutex.RLock()
+	defer fake.proposalActivatedMutex.RUnlock()
+	fake.proposalDissolvedMutex.RLock()
+	defer fake.proposalDissolvedMutex.RUnlock()
+	fake.proposalFailedMutex.RLock()
+	defer fake.proposalFailedMutex.RUnlock()
 	fake.specUpdatedMutex.RLock()
 	defer fake.specUpdatedMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

@@ -3,15 +3,15 @@ apiVersion: ibp.com/v1beta1
 kind: Federation
 metadata:
   name: federation-sample
-  namespace: org0
+  namespace: org1
 spec:
   license:
     accept: true
   description: "federation with org0 & org1"
   policy: "ALL"
   members:
-    - name: org0
-      namespace: org0
-      initiator: true
     - name: org1
       namespace: org1
+      initiator: true
+    - name: org2
+      namespace: org2

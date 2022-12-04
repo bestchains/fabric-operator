@@ -42,6 +42,9 @@ var log = logf.Log.WithName("base_federation")
 type Update interface {
 	SpecUpdated() bool
 	MemberUpdated() bool
+	ProposalActivated() bool
+	ProposalFailed() bool
+	ProposalDissolved() bool
 }
 
 //go:generate counterfeiter -o mocks/override.go -fake-name Override . Override
@@ -57,7 +60,7 @@ type Federation interface {
 	PreReconcileChecks(instance *current.Federation, update Update) error
 	Initialize(instance *current.Federation, update Update) error
 	ReconcileManagers(instance *current.Federation, update Update) error
-	CheckStates(instance *current.Federation) (common.Result, error)
+	CheckStates(instance *current.Federation, update Update) (common.Result, error)
 	Reconcile(instance *current.Federation, update Update) (common.Result, error)
 }
 
@@ -119,7 +122,7 @@ func (federation *BaseFederation) Reconcile(instance *current.Federation, update
 		return common.Result{}, errors.Wrap(err, "failed to reconcile managers")
 	}
 
-	return federation.CheckStates(instance)
+	return federation.CheckStates(instance, update)
 }
 
 // PreReconcileChecks on Federation upon Update
@@ -163,10 +166,20 @@ func (federation *BaseFederation) ReconcileManagers(instance *current.Federation
 }
 
 // CheckStates on Federation
-func (federation *BaseFederation) CheckStates(instance *current.Federation) (common.Result, error) {
+func (federation *BaseFederation) CheckStates(instance *current.Federation, update Update) (common.Result, error) {
 	status := instance.Status.CRStatus
 	if !instance.HasType() {
 		status.Type = current.FederationPending
+		status.Status = current.True
+	}
+	if update.ProposalActivated() {
+		status.Type = current.FederationActivated
+		status.Status = current.True
+	} else if update.ProposalFailed() {
+		status.Type = current.FederationFailed
+		status.Status = current.True
+	} else if update.ProposalDissolved() {
+		status.Type = current.FederationDissolved
 		status.Status = current.True
 	}
 	return common.Result{

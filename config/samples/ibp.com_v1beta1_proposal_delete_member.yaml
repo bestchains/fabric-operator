@@ -1,0 +1,17 @@
+---
+apiVersion: ibp.com/v1beta1
+kind: Proposal
+metadata:
+  name: delete-member-federation-sample
+spec:
+  federation:
+    namespace: org1
+    name: federation-sample
+  policy: All
+  initiator:
+    namespace: org1
+    name: org1
+  deleteMember:
+    member:
+      namespace: org2
+      name: org2

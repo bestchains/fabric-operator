@@ -183,7 +183,7 @@ var _ = Describe("Openshift Peer", func() {
 
 		// Disabling this test because the function uses rest client which cannot be mocked
 		// It("adds dind args in CR if not passed", func() {
-		// 	mockKubeClient.GetStub = func(ctx context.Context, types types.NamespacedName, obj client.Object) error {
+		// 	mockKubeClient.GetStub = func(ctx context.Context, types types.GetNamespacedName, obj client.Object) error {
 		// 		switch obj.(type) {
 		// 		case *openshiftv1.ClusterVersion:
 		// 			cv := &openshiftv1.ClusterVersion{

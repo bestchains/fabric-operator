@@ -351,7 +351,7 @@ var _ = Describe("Initializing the Peer", func() {
 // 		Expect(err).NotTo(HaveOccurred())
 
 // 		mockClient = &mocks.Client{}
-// 		mockClient.GetStub = func(ctx context.Context, types types.NamespacedName, obj runtime.Object) error {
+// 		mockClient.GetStub = func(ctx context.Context, types types.GetNamespacedName, obj runtime.Object) error {
 // 			switch obj.(type) {
 // 			case *corev1.Secret:
 // 				s := obj.(*corev1.Secret)
@@ -417,7 +417,7 @@ var _ = Describe("Initializing the Peer", func() {
 // 	})
 
 // It("returns error, if secrets found but contains no data", func() {
-// 	mockClient.GetStub = func(ctx context.Context, types types.NamespacedName, obj runtime.Object) error {
+// 	mockClient.GetStub = func(ctx context.Context, types types.GetNamespacedName, obj runtime.Object) error {
 // 		switch obj.(type) {
 // 		case *corev1.Secret:
 // 			s := obj.(*corev1.Secret)
@@ -431,7 +431,7 @@ var _ = Describe("Initializing the Peer", func() {
 // })
 
 // It("returns error, if secrets found but contains bad data", func() {
-// 	mockClient.GetStub = func(ctx context.Context, types types.NamespacedName, obj runtime.Object) error {
+// 	mockClient.GetStub = func(ctx context.Context, types types.GetNamespacedName, obj runtime.Object) error {
 // 		switch obj.(type) {
 // 		case *corev1.Secret:
 // 			s := obj.(*corev1.Secret)
@@ -460,7 +460,7 @@ var _ = Describe("Initializing the Peer", func() {
 // 	})
 
 // 	It("returns error, if secrets found but contains no data", func() {
-// 		mockClient.GetStub = func(ctx context.Context, types types.NamespacedName, obj runtime.Object) error {
+// 		mockClient.GetStub = func(ctx context.Context, types types.GetNamespacedName, obj runtime.Object) error {
 // 			switch obj.(type) {
 // 			case *corev1.Secret:
 // 				s := obj.(*corev1.Secret)
@@ -474,7 +474,7 @@ var _ = Describe("Initializing the Peer", func() {
 // 	})
 
 // 	It("returns error, if secrets found but contains bad data", func() {
-// 		mockClient.GetStub = func(ctx context.Context, types types.NamespacedName, obj runtime.Object) error {
+// 		mockClient.GetStub = func(ctx context.Context, types types.GetNamespacedName, obj runtime.Object) error {
 // 			switch obj.(type) {
 // 			case *corev1.Secret:
 // 				s := obj.(*corev1.Secret)

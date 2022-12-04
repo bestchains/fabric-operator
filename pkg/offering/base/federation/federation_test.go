@@ -80,16 +80,16 @@ var _ = Describe("BaseFederation Reconcile Logic", func() {
 		})
 		It("error on multiple initiator", func() {
 			instance.Spec.Members = []current.Member{
-				{Name: "org1", Namespace: "org1", Initiator: true},
-				{Name: "org2", Namespace: "org2", Initiator: true},
+				{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
+				{NamespacedName: current.NamespacedName{Name: "org2", Namespace: "org2"}, Initiator: true},
 			}
 			err = reconciler.PreReconcileChecks(instance, update)
 			Expect(err.Error()).To(ContainSubstring("only allow one initiator"))
 		})
 		It("missing policy", func() {
 			instance.Spec.Members = []current.Member{
-				{Name: "org1", Namespace: "org1", Initiator: true},
-				{Name: "org2", Namespace: "org2", Initiator: false},
+				{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
+				{NamespacedName: current.NamespacedName{Name: "org2", Namespace: "org2"}, Initiator: false},
 			}
 			err = reconciler.PreReconcileChecks(instance, update)
 			Expect(err.Error()).To(ContainSubstring("federation policy is empty"))
@@ -130,13 +130,13 @@ var _ = Describe("BaseFederation Reconcile Logic", func() {
 			instance.Status.CRStatus = current.CRStatus{
 				Type: current.FederationActivated,
 			}
-			result, err := reconciler.CheckStates(instance)
+			result, err := reconciler.CheckStates(instance, update)
 			Expect(err).To(BeNil())
 			Expect(result.Status.Type).To(Equal(current.FederationActivated))
 		})
 
 		It("instance do not have type", func() {
-			result, err := reconciler.CheckStates(instance)
+			result, err := reconciler.CheckStates(instance, update)
 			Expect(err).To(BeNil())
 			Expect(result.Status.Type).To(Equal(current.FederationPending))
 		})
