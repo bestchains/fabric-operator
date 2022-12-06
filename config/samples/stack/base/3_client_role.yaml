@@ -89,3 +89,18 @@ rules:
   - federations/status
   verbs:
   - get
+# CRD Network
+- apiGroups:
+    - ibp.com
+  resources:
+    - networks
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - ibp.com
+  resources:
+    - networks/status
+  verbs:
+    - get

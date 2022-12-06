@@ -188,6 +188,9 @@ type IBPOrdererClusterLocation struct {
 // +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
 type IBPOrdererStatus struct {
 	CRStatus `json:",inline"`
+
+	// TODO: Networks which utilize this IBPOrderer cluster
+	// Networks []NamespacedName `json:"networks,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

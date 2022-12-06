@@ -1,4 +1,4 @@
-namespace: org2
+namespace: org0
 
 namePrefix:
 
@@ -12,5 +12,5 @@ patches:
   patch: |-
     - op: replace
       path: /metadata/name
-      value: org2
+      value: org0
   

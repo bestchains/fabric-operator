@@ -5,20 +5,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
-  name: federations.ibp.com
+  name: networks.ibp.com
 spec:
   group: ibp.com
   names:
-    kind: Federation
-    listKind: FederationList
-    plural: federations
-    singular: federation
+    kind: Network
+    listKind: NetworkList
+    plural: networks
+    singular: network
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Federation is the Schema for the federations API
+        description: Network is the Schema for the networks API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -33,11 +33,24 @@ spec:
           metadata:
             type: object
           spec:
-            description: FederationSpec defines the desired state of Federation
+            description: NetworkSpec defines the desired state of Network
             properties:
-              description:
-                description: Description for this Federation
-                type: string
+              consensus:
+                description: Consensus cluster(IBPOrderer) which this network utilizes
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+              federation:
+                description: Federation which this network belongs to
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
               license:
                 description: License should be accepted by the user to be able to
                   setup console
@@ -49,8 +62,8 @@ spec:
                     type: boolean
                 type: object
               members:
-                description: Members list all organization in this federation True
-                  for Initiator; False for normal organizaiton namespace-name
+                description: Members which this network contains (DO NOT EDIT)Cloned
+                  automatically from Fderation.Spec.Members
                 items:
                   description: Member in a Fedeartion
                   properties:
@@ -62,15 +75,11 @@ spec:
                       type: string
                   type: object
                 type: array
-              policy:
-                description: Policy indicates the rules that this Federation make
-                  dicisions
-                type: string
             required:
             - license
             type: object
           status:
-            description: FederationStatus defines the observed state of Federation
+            description: NetworkStatus defines the observed state of Network
             properties:
               errorcode:
                 description: ErrorCode is the code of classification of errors
@@ -83,16 +92,6 @@ spec:
                 description: Message provides a message for the status to be shown
                   to customer
                 type: string
-              networks:
-                description: 'TODO: save networks under this federation'
-                items:
-                  properties:
-                    name:
-                      type: string
-                    namespace:
-                      type: string
-                  type: object
-                type: array
               reason:
                 description: Reason provides a reason for an error
                 type: string

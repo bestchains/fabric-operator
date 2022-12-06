@@ -27,6 +27,10 @@ func (federation *Federation) GetNamespacedName() string {
 	return federation.GetNamespace() + "-" + federation.GetName()
 }
 
+func (federation *Federation) NamespacedName() NamespacedName {
+	return NamespacedName{Name: federation.Name, Namespace: federation.Namespace}
+}
+
 func (federation *Federation) GetInitiator() (int, Member) {
 	for index, m := range federation.Spec.Members {
 		if m.Initiator {
@@ -70,7 +74,7 @@ func (federation *Federation) HasType() bool {
 	return federation.Status.CRStatus.Type != ""
 }
 
-func (federation *Federation) HashMembers() bool {
+func (federation *Federation) HasMembers() bool {
 	return len(federation.Spec.Members) != 0
 }
 
@@ -102,4 +106,42 @@ func DifferMembers(old []Member, new []Member) (added []Member, removed []Member
 	}
 
 	return
+}
+
+func (federationStatus *FederationStatus) AddNetwork(network NamespacedName) bool {
+	var conflict bool
+
+	for _, f := range federationStatus.Networks {
+		if f.String() == network.String() {
+			conflict = true
+			break
+		}
+	}
+
+	if !conflict {
+		federationStatus.Networks = append(federationStatus.Networks, network)
+	}
+
+	return conflict
+}
+
+func (federationStatus *FederationStatus) DeleteNetwork(network NamespacedName) bool {
+	var exist bool
+	var index int
+
+	networks := federationStatus.Networks
+
+	for curr, f := range networks {
+		if f.String() == network.String() {
+			exist = true
+			index = curr
+			break
+		}
+	}
+
+	if exist {
+		federationStatus.Networks = append(networks[:index], networks[index+1:]...)
+	}
+
+	return exist
 }

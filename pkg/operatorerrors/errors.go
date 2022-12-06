@@ -58,6 +58,7 @@ const (
 	InvalidClusterRoleUpdateRequest
 	InvalidClusterRoleBindingCreateRequest
 	InvalidClusterRoleBindingUpdateRequest
+	NetworkInitializationFailed
 )
 
 var (
@@ -92,6 +93,7 @@ var (
 		InvalidClusterRoleUpdateRequest:        nil,
 		InvalidClusterRoleBindingCreateRequest: nil,
 		InvalidClusterRoleBindingUpdateRequest: nil,
+		NetworkInitializationFailed:            nil,
 	}
 )
 

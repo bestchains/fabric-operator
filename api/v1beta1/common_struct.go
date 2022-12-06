@@ -121,25 +121,33 @@ const (
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
 	Initializing IBPCRStatusType = "Initializing"
 
-	// Created is the status when component is created successfully without any deployments
+	// Created is the status when component is created successfully without **any deployments**
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
 	Created IBPCRStatusType = "Created"
 
-	// Pending means `Proposal-Vote` not passed yet
+	// FederationPending means `Proposal-Vote` not passed yet
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
 	FederationPending IBPCRStatusType = "FederationPending"
 
-	// Activated means `Proposal-Vote`passed
+	// FederationActivated means `Proposal-Vote`passed
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
 	FederationActivated IBPCRStatusType = "FederationActivated"
 
-	// Failed means `Proposal-Vote` failed
+	// FederationFailed means `Proposal-Vote` failed
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
 	FederationFailed IBPCRStatusType = "FederationFailed"
 
-	// Dissolved means `Federation` no longer active
+	// FederationDissolved means `Federation` no longer active
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
 	FederationDissolved IBPCRStatusType = "FederationDissolved"
+
+	// NetworkCreated means network created by a federation member
+	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
+	NetworkCreated IBPCRStatusType = "NetworkCreated"
+
+	// NetworkDissoleved means network been dissolved by `Proposal-Vote`
+	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
+	NetworkDissoleved IBPCRStatusType = "NetworkDissolved"
 )
 
 // +k8s:deepcopy-gen=true

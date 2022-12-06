@@ -35,13 +35,13 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var _ = Describe("BaseFederation Overrides", func() {
+var _ = Describe("Base network Overrides", func() {
 	var (
 		client *mocks.Client
 
 		overrider *Override
 
-		instance *current.Federation
+		instance *current.Network
 
 		cr  *rbacv1.ClusterRole
 		crb *rbacv1.ClusterRoleBinding
@@ -56,18 +56,19 @@ var _ = Describe("BaseFederation Overrides", func() {
 			SubjectKind: clusterrolebinding.ServiceAccount,
 		}
 
-		cr, err = util.GetClusterRoleFromFile("../../../../../definitions/federation/clusterrole.yaml")
+		cr, err = util.GetClusterRoleFromFile("../../../../../definitions/network/clusterrole.yaml")
 		Expect(err).NotTo(HaveOccurred())
 
-		crb, err = util.GetClusterRoleBindingFromFile("../../../../../definitions/federation/clusterrolebinding.yaml")
+		crb, err = util.GetClusterRoleBindingFromFile("../../../../../definitions/network/clusterrolebinding.yaml")
 		Expect(err).NotTo(HaveOccurred())
 
-		instance = &current.Federation{
+		instance = &current.Network{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "federation-sample",
+				Name:      "network-sample",
 				Namespace: "org1",
 			},
-			Spec: current.FederationSpec{
+			Spec: current.NetworkSpec{
+				Federation: current.NamespacedName{Name: "federation-sample"},
 				Members: []current.Member{
 					{Name: "org1", Namespace: "org1", Initiator: true},
 					{Name: "org2", Namespace: "org3", Initiator: false},
@@ -119,13 +120,13 @@ var _ = Describe("BaseFederation Overrides", func() {
 	})
 })
 
-func ValidateClusterRole(instance *current.Federation, cr *rbacv1.ClusterRole) {
+func ValidateClusterRole(instance *current.Network, cr *rbacv1.ClusterRole) {
 	By("setting resource name", func() {
 		Expect(cr.Rules[0].ResourceNames).Should(ContainElements(instance.GetName()))
 	})
 }
 
-func ValidateClusterRoleBinding(instance *current.Federation, crb *rbacv1.ClusterRoleBinding) {
+func ValidateClusterRoleBinding(instance *current.Network, crb *rbacv1.ClusterRoleBinding) {
 	By("setting subjects", func() {
 		Expect(len(crb.Subjects)).To(Equal(len(instance.Spec.Members)))
 	})

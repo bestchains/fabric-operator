@@ -16,32 +16,27 @@
  * limitations under the License.
  */
 
-package override
+package override_test
 
 import (
-	"context"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
-	"github.com/IBM-Blockchain/fabric-operator/controllers/mocks"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources"
-	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/clusterrolebinding"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/offering/k8s/network/override"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/offering/k8s/network/override/mocks"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/util"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var _ = Describe("BaseFederation Overrides", func() {
+var _ = Describe("K8S Network Overrides", func() {
 	var (
-		client *mocks.Client
+		mockedBaseOverrider *mocks.BaseOverride
+		overrider           *override.Override
 
-		overrider *Override
-
-		instance *current.Federation
+		instance *current.Network
 
 		cr  *rbacv1.ClusterRole
 		crb *rbacv1.ClusterRoleBinding
@@ -50,24 +45,22 @@ var _ = Describe("BaseFederation Overrides", func() {
 	)
 
 	BeforeEach(func() {
-		client = &mocks.Client{}
-		overrider = &Override{
-			Client:      client,
-			SubjectKind: clusterrolebinding.ServiceAccount,
+		mockedBaseOverrider = &mocks.BaseOverride{}
+		overrider = &override.Override{
+			BaseOverride: mockedBaseOverrider,
 		}
 
-		cr, err = util.GetClusterRoleFromFile("../../../../../definitions/federation/clusterrole.yaml")
+		cr, err = util.GetClusterRoleFromFile("../../../../../definitions/network/clusterrole.yaml")
 		Expect(err).NotTo(HaveOccurred())
 
-		crb, err = util.GetClusterRoleBindingFromFile("../../../../../definitions/federation/clusterrolebinding.yaml")
+		crb, err = util.GetClusterRoleBindingFromFile("../../../../../definitions/network/clusterrolebinding.yaml")
 		Expect(err).NotTo(HaveOccurred())
-
-		instance = &current.Federation{
+		instance = &current.Network{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "federation-sample",
+				Name:      "network-sample",
 				Namespace: "org1",
 			},
-			Spec: current.FederationSpec{
+			Spec: current.NetworkSpec{
 				Members: []current.Member{
 					{Name: "org1", Namespace: "org1", Initiator: true},
 					{Name: "org2", Namespace: "org3", Initiator: false},
@@ -76,15 +69,45 @@ var _ = Describe("BaseFederation Overrides", func() {
 			},
 		}
 
-		client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
-			switch obj := o.(type) {
-			case *current.Organization:
-				obj.Name = nn.Name
-				obj.Namespace = nn.Namespace
-				obj.Spec.Admin = nn.Name + "-admin"
-			}
+		mockedBaseOverrider.CreateClusterRoleStub = func(f *current.Network, cr *rbacv1.ClusterRole) error {
+			cr.Name = f.GetNamespacedName()
+			cr.Namespace = f.GetNamespace()
+
+			cr.Rules = append(cr.Rules, rbacv1.PolicyRule{
+				Verbs:         []string{"get"},
+				APIGroups:     []string{"ibp.com"},
+				Resources:     []string{"networks"},
+				ResourceNames: []string{f.GetName()},
+			})
+
 			return nil
 		}
+		mockedBaseOverrider.UpdateClusterRoleStub = mockedBaseOverrider.CreateClusterRoleStub
+
+		mockedBaseOverrider.CreateClusterRoleBindingStub = func(f *current.Network, crb *rbacv1.ClusterRoleBinding) error {
+			crb.Name = f.GetNamespacedName()
+			crb.Namespace = f.GetNamespace()
+
+			crb.RoleRef = rbacv1.RoleRef{
+				Kind: "ClusterRole",
+				Name: f.GetNamespacedName(),
+			}
+
+			subjects := make([]rbacv1.Subject, 0, len(instance.GetMembers()))
+
+			for _, member := range f.GetMembers() {
+				subjects = append(subjects, rbacv1.Subject{
+					Kind:      "ServiceAccount",
+					Name:      member.Name + "-admin",
+					Namespace: member.Namespace,
+				})
+			}
+
+			crb.Subjects = subjects
+			return nil
+		}
+
+		mockedBaseOverrider.UpdateClusterRoleBindingStub = mockedBaseOverrider.CreateClusterRoleBindingStub
 
 	})
 
@@ -119,13 +142,18 @@ var _ = Describe("BaseFederation Overrides", func() {
 	})
 })
 
-func ValidateClusterRole(instance *current.Federation, cr *rbacv1.ClusterRole) {
+func ValidateClusterRole(instance *current.Network, cr *rbacv1.ClusterRole) {
 	By("setting resource name", func() {
 		Expect(cr.Rules[0].ResourceNames).Should(ContainElements(instance.GetName()))
 	})
 }
 
-func ValidateClusterRoleBinding(instance *current.Federation, crb *rbacv1.ClusterRoleBinding) {
+func ValidateClusterRoleBinding(instance *current.Network, crb *rbacv1.ClusterRoleBinding) {
+	By("setting roleRef", func() {
+		Expect(crb.RoleRef.Kind).To(Equal("ClusterRole"))
+		Expect(crb.RoleRef.Name).To(Equal(instance.GetNamespacedName()))
+	})
+
 	By("setting subjects", func() {
 		Expect(len(crb.Subjects)).To(Equal(len(instance.Spec.Members)))
 	})

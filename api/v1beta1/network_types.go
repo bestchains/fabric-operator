@@ -22,61 +22,48 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// FederationSpec defines the desired state of Federation
-// +k8s:deepcopy-gen=true
-// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
-type FederationSpec struct {
+// NetworkSpec defines the desired state of Network
+type NetworkSpec struct {
 	// License should be accepted by the user to be able to setup console
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
 	License License `json:"license"`
 
-	// Description for this Federation
+	// Federation which this network belongs to
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
-	Description string `json:"description,omitempty"`
+	Federation NamespacedName `json:"federation,omitempty"`
 
-	// Members list all organization in this federation
-	// True for Initiator; False for normal organizaiton
-	// namespace-name
+	// Members which this network contains
+	// (DO NOT EDIT)Cloned automatically from Fderation.Spec.Members
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
 	Members []Member `json:"members,omitempty"`
 
-	// Policy indicates the rules that this Federation make dicisions
+	// Consensus cluster(IBPOrderer) which this network utilizes
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
-	Policy Policy `json:"policy,omitempty"`
+	Consensus NamespacedName `json:"consensus,omitempty"`
 }
 
-// Member in a Fedeartion
-// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
-type Member struct {
-	Name      string `json:"name,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
-	Initiator bool   `json:"initiator,omitempty"`
-}
-
-// FederationStatus defines the observed state of Federation
-type FederationStatus struct {
+// NetworkStatus defines the observed state of Network
+type NetworkStatus struct {
 	CRStatus `json:",inline"`
-
-	// TODO: save networks under this federation
-	Networks []NamespacedName `json:"networks,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// Federation is the Schema for the federations API
-type Federation struct {
+// Network is the Schema for the networks API
+type Network struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   FederationSpec   `json:"spec,omitempty"`
-	Status FederationStatus `json:"status,omitempty"`
+	Spec   NetworkSpec   `json:"spec,omitempty"`
+	Status NetworkStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// FederationList contains a list of Federation
-type FederationList struct {
+// NetworkList contains a list of Network
+type NetworkList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Federation `json:"items"`
+	Items           []Network `json:"items"`
 }

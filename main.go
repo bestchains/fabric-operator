@@ -26,6 +26,7 @@ import (
 	"github.com/IBM-Blockchain/fabric-operator/pkg/command"
 	cainit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/ca"
 	fedinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/federation"
+	netinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/network"
 	ordererinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/orderer"
 	orginit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/organization"
 	peerinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/peer"
@@ -49,6 +50,7 @@ const (
 	defaultOrdererDef    = "./definitions/orderer"
 	defaultConsoleDef    = "./definitions/console"
 	defaultFederationDef = "./definitions/federation"
+	defaultNetworkDef    = "./definitions/network"
 )
 
 var log = logf.Log.WithName("cmd")
@@ -74,6 +76,7 @@ func main() {
 	setDefaultConsoleDefinitions(operatorCfg)
 	setDefaultOrganizationDefinitions(operatorCfg)
 	setDefaultFederationDefinitions(operatorCfg)
+	setDefaultNetworkDefinitions(operatorCfg)
 
 	operatorCfg.Operator.SetDefaults()
 
@@ -210,6 +213,13 @@ func setDefaultOrganizationDefinitions(cfg *config.Config) {
 
 func setDefaultFederationDefinitions(cfg *config.Config) {
 	cfg.FederationInitConfig = &fedinit.Config{
+		ClusterRoleFile:        filepath.Join(defaultFederationDef, "clusterrole.yaml"),
+		ClusterRoleBindingFile: filepath.Join(defaultFederationDef, "clusterrolebinding.yaml"),
+	}
+}
+
+func setDefaultNetworkDefinitions(cfg *config.Config) {
+	cfg.NetworkInitConfig = &netinit.Config{
 		ClusterRoleFile:        filepath.Join(defaultFederationDef, "clusterrole.yaml"),
 		ClusterRoleBindingFile: filepath.Join(defaultFederationDef, "clusterrolebinding.yaml"),
 	}

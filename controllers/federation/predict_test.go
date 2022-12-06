@@ -20,6 +20,7 @@ package federation
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
@@ -28,7 +29,9 @@ import (
 	. "github.com/onsi/gomega"
 	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -124,7 +127,6 @@ var _ = Describe("Predict federation events", func() {
 			update := reconciler.GetUpdateStatus(federation)
 			Expect(update.GetUpdateStackWithTrues(), "specUpdated  memberUpdated")
 		})
-
 	})
 
 	Context("Update events", func() {
@@ -226,10 +228,133 @@ var _ = Describe("Predict federation events", func() {
 			}
 
 			e := event.UpdateEvent{ObjectOld: oldFed, ObjectNew: newFed}
-
 			Expect(reconciler.UpdateFunc(e)).To(BeTrue())
 			update := reconciler.GetUpdateStatus(oldFed)
 			Expect(update.GetUpdateStackWithTrues(), "specUpdated memberChanged")
+		})
+	})
+
+	Context("PredictNetwork Create/Delete", func() {
+		var err error
+		var federation *current.Federation
+		var network *current.Network
+		BeforeEach(func() {
+			federation = &current.Federation{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      "federation-sample",
+					Namespace: "org1",
+				},
+				Spec: current.FederationSpec{
+					Description: "federation for two",
+					Members: []current.Member{
+						{Name: "org1", Namespace: "org1", Initiator: true},
+						{Name: "org2", Namespace: "org2", Initiator: false},
+					},
+				},
+			}
+
+			network = &current.Network{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      "network-sample",
+					Namespace: "org1",
+				},
+				Spec: current.NetworkSpec{
+					Federation: federation.NamespacedName(),
+					Members:    federation.GetMembers(),
+					Consensus:  current.NamespacedName{Name: "ibporderer-sample", Namespace: "org1"},
+				},
+			}
+		})
+		It("PredictCreate failed due to federation not found", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				return k8serrors.NewNotFound(
+					schema.GroupResource{Group: "ibp.com", Resource: "federations"},
+					"org0",
+				)
+			}
+			err = reconciler.AddNetwork(federation.NamespacedName(), network.NamespacedName())
+
+			Expect(k8serrors.IsNotFound(err)).To(BeTrue())
+		})
+
+		It("PredictCreate failed due to network already in federation", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				switch obj := o.(type) {
+				case *current.Federation:
+					obj.ObjectMeta = federation.ObjectMeta
+					obj.Spec = federation.Spec
+
+					federation.Status.Networks = append(federation.Status.Networks, network.NamespacedName())
+					obj.Status = federation.Status
+				}
+				return nil
+			}
+			err = reconciler.AddNetwork(federation.NamespacedName(), network.NamespacedName())
+
+			Expect(err.Error()).To(ContainSubstring("already exist"))
+		})
+
+		It("PredictCreate failed when patch status", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				switch obj := o.(type) {
+				case *current.Federation:
+					obj.ObjectMeta = federation.ObjectMeta
+					obj.Spec = federation.Spec
+					obj.Status = federation.Status
+				}
+				return nil
+			}
+			errMsg := "patch status failed"
+			client.PatchStatusReturns(errors.New(errMsg))
+			err = reconciler.AddNetwork(federation.NamespacedName(), network.NamespacedName())
+
+			Expect(err.Error()).To(Equal(errMsg))
+		})
+
+		It("PredictCreate fails due to federation not found", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				return k8serrors.NewNotFound(
+					schema.GroupResource{Group: "ibp.com", Resource: "federations"},
+					"org0",
+				)
+			}
+			err = reconciler.DeleteNetwork(federation.NamespacedName(), network.NamespacedName())
+
+			Expect(k8serrors.IsNotFound(err)).To(BeTrue())
+		})
+
+		It("PredictCreate fails due to network not in federation.status.networks", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				switch obj := o.(type) {
+				case *current.Federation:
+					obj.ObjectMeta = federation.ObjectMeta
+					obj.Spec = federation.Spec
+
+					obj.Status.CRStatus = federation.Status.CRStatus
+				}
+				return nil
+			}
+			err = reconciler.DeleteNetwork(federation.NamespacedName(), network.NamespacedName())
+
+			Expect(err.Error()).To(ContainSubstring("not exist"))
+		})
+
+		It("PredictCreate fails when patch status", func() {
+			client.GetStub = func(ctx context.Context, nn types.NamespacedName, o k8sclient.Object) error {
+				switch obj := o.(type) {
+				case *current.Federation:
+					obj.ObjectMeta = federation.ObjectMeta
+					obj.Spec = federation.Spec
+					obj.Status = federation.Status
+					obj.Status.Networks = append(obj.Status.Networks, network.NamespacedName())
+				}
+				return nil
+			}
+			errMsg := "patch status failed"
+			client.PatchStatusReturns(errors.New(errMsg))
+			err = reconciler.DeleteNetwork(federation.NamespacedName(), network.NamespacedName())
+
+			Expect(err.Error()).To(Equal(errMsg))
 		})
 	})
 })

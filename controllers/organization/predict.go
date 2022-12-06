@@ -172,7 +172,6 @@ func (r *ReconcileOrganization) DeleteFunc(e event.DeleteEvent) bool {
 	var reconcile bool
 	switch e.Object.(type) {
 	case *current.Federation:
-		// TODO: federaion delete ,then remove this fed from its fed list
 		federation := e.Object.(*current.Federation)
 		log.Info(fmt.Sprintf("Delete event detected for federation '%s'", federation.GetNamespacedName()))
 		reconcile = r.PredictFederationDelete(federation)
