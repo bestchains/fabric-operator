@@ -56,8 +56,8 @@ var _ = Describe("ReconcileFederation", func() {
 			Spec: current.NetworkSpec{
 				Federation: current.NamespacedName{Name: "fedeartion-sample", Namespace: "org1"},
 				Members: []current.Member{
-					{Name: "org1", Namespace: "org1", Initiator: true},
-					{Name: "org2", Namespace: "org2", Initiator: false},
+					{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
+					{NamespacedName: current.NamespacedName{Name: "org2", Namespace: "org2"}, Initiator: false},
 				},
 				Consensus: current.NamespacedName{
 					Name:      "ibporderer-org1",

@@ -19,7 +19,11 @@
 package common
 
 import (
+	"os"
+
+	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/clusterrolebinding"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -104,5 +108,21 @@ func GetPodAntiAffinity(orgName string) *corev1.PodAntiAffinity {
 				},
 			},
 		},
+	}
+}
+
+func GetDefaultSubject(name, namespace string, kind clusterrolebinding.SubjectKind) rbacv1.Subject {
+	if kind == "" {
+		if os.Getenv("OPERATOR_USER_TYPE") == "sa" {
+			kind = clusterrolebinding.ServiceAccount
+		} else {
+			kind = clusterrolebinding.User
+			namespace = ""
+		}
+	}
+	return rbacv1.Subject{
+		Kind:      string(kind),
+		Name:      name,
+		Namespace: namespace,
 	}
 }

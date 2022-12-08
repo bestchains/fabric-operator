@@ -33,13 +33,6 @@ type Override struct {
 	SubjectKind clusterrolebinding.SubjectKind
 }
 
-func (o *Override) GetSubjectKind() clusterrolebinding.SubjectKind {
-	if o.SubjectKind == "" {
-		return clusterrolebinding.ServiceAccount
-	}
-	return o.SubjectKind
-}
-
 func (o *Override) GetOrganization(member current.Member) (*current.Organization, error) {
 	organization := &current.Organization{}
 	if err := o.Client.Get(context.TODO(), types.NamespacedName{Name: member.Name, Namespace: member.Namespace}, organization); err != nil {

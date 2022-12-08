@@ -59,8 +59,8 @@ var _ = Describe("Predict on Network", func() {
 			Spec: current.FederationSpec{
 				Description: "federation for two",
 				Members: []current.Member{
-					{Name: "org1", Namespace: "org1", Initiator: true},
-					{Name: "org2", Namespace: "org2", Initiator: false},
+					{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
+					{NamespacedName: current.NamespacedName{Name: "org2", Namespace: "org2"}, Initiator: false},
 				},
 			},
 		}
@@ -72,8 +72,8 @@ var _ = Describe("Predict on Network", func() {
 			Spec: current.NetworkSpec{
 				Federation: federation.NamespacedName(),
 				Members: []current.Member{
-					{Name: "org1", Namespace: "org1", Initiator: true},
-					{Name: "org2", Namespace: "org2", Initiator: false},
+					{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
+					{NamespacedName: current.NamespacedName{Name: "org2", Namespace: "org2"}, Initiator: false},
 				},
 				Consensus: current.NamespacedName{
 					Name:      "ibporderer-org1",
@@ -89,7 +89,7 @@ var _ = Describe("Predict on Network", func() {
 			Spec: current.NetworkSpec{
 				Federation: federation.NamespacedName(),
 				Members: []current.Member{
-					{Name: "org1", Namespace: "org1", Initiator: true},
+					{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
 				},
 			},
 			// status detected

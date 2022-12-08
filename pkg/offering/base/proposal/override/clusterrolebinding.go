@@ -24,6 +24,7 @@ import (
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/client"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/offering/common"
 	rbacv1 "k8s.io/api/rbac/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -50,11 +51,7 @@ func (o *Override) SyncClusterRoleBinding(instance *current.Proposal, crb *rbacv
 		if err != nil {
 			return err
 		}
-		subjects = append(subjects, rbacv1.Subject{
-			Kind:      string(o.GetSubjectKind()),
-			Name:      organization.Spec.Admin,
-			Namespace: organization.Namespace,
-		})
+		subjects = append(subjects, common.GetDefaultSubject(organization.Spec.Admin, organization.Namespace, o.SubjectKind))
 	}
 	crb.Subjects = subjects
 

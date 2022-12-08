@@ -247,8 +247,8 @@ var _ = Describe("Predict federation events", func() {
 				Spec: current.FederationSpec{
 					Description: "federation for two",
 					Members: []current.Member{
-						{Name: "org1", Namespace: "org1", Initiator: true},
-						{Name: "org2", Namespace: "org2", Initiator: false},
+						{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
+						{NamespacedName: current.NamespacedName{Name: "org2", Namespace: "org2"}, Initiator: false},
 					},
 				},
 			}

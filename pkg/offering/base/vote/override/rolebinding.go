@@ -22,6 +22,7 @@ import (
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/client"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/offering/common"
 	rbacv1 "k8s.io/api/rbac/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -42,12 +43,7 @@ func (o *Override) SyncRoleBinding(instance *current.Vote, rb *rbacv1.RoleBindin
 	if err != nil {
 		return err
 	}
-	rb.Subjects = []rbacv1.Subject{{
-		Kind:      string(o.GetSubjectKind()),
-		Name:      organization.Spec.Admin,
-		Namespace: organization.Namespace,
-	}}
-
+	rb.Subjects = append(rb.Subjects, common.GetDefaultSubject(organization.Spec.Admin, organization.Namespace, o.SubjectKind))
 	rb.OwnerReferences = []v1.OwnerReference{
 		{
 			Kind:       "Vote",
