@@ -7,12 +7,12 @@ spec:
     accept: true
   federation:
     name: federation-sample
-    namespace: org0
+    namespace: org1
   consensus:
     name: org0-consensus
   members:
-    - name: org0
-      namespace: org0
-      initiator: true # set by webhook
     - name: org1
       namespace: org1
+      initiator: true # set by webhook
+    - name: org2
+      namespace: org2

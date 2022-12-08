@@ -104,3 +104,32 @@ rules:
     - networks/status
   verbs:
     - get
+# CRD Proposal
+- apiGroups:
+    - ibp.com
+  resources:
+    - proposals
+  verbs:
+    - get
+    - list
+- apiGroups:
+    - ibp.com
+  resources:
+    - proposals/status
+  verbs:
+    - get
+# CRD Vote
+- apiGroups:
+    - ibp.com
+  resources:
+    - votes
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - ibp.com
+  resources:
+    - votes/status
+  verbs:
+    - get

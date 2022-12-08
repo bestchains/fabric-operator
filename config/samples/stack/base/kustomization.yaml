@@ -2,8 +2,10 @@ resources:
   - 1_namespace.yaml
   - 2_service_account.yaml
   - 3_admin_role.yaml
+  - 3_admin_cluster_role.yaml
   - 3_client_role.yaml
   - 4_admin_rolebinding.yaml
+  - 4_admin_cluster_rolebinding.yaml
   - 4_client_rolebinding.yaml
   - 5_ca.yaml
   - 6_organization.yaml

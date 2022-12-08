@@ -102,7 +102,9 @@ rules:
       - "rbac.authorization.k8s.io"
     resources:
       - roles
+      - clusterroles
       - rolebindings
+      - clusterrolebindings
     verbs:
       - get
       - list
@@ -158,18 +160,38 @@ rules:
       - ibppeers.ibp.com
       - ibporderers.ibp.com
       - ibpconsoles.ibp.com
+      - federations.ibp.com
+      - organizations.ibp.com
+      - proposals.ibp.com
+      - votes.ibp.com
+      - networks.ibp.com
       - ibpcas
       - ibppeers
       - ibporderers
       - ibpconsoles
+      - federations
+      - organizations
+      - proposals
+      - votes
+      - networks
       - ibpcas/finalizers
       - ibppeers/finalizers
       - ibporderers/finalizers
       - ibpconsoles/finalizers
+      - federations/finalizers
+      - organizations/finalizers
+      - proposals/finalizers
+      - votes/finalizers
+      - networks/finalizers
       - ibpcas/status
       - ibppeers/status
       - ibporderers/status
       - ibpconsoles/status
+      - federations/status
+      - organizations/status
+      - proposals/status
+      - votes/status
+      - networks/status
     verbs:
       - get
       - list

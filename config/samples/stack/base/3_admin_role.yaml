@@ -115,3 +115,20 @@ rules:
     - networks/status
   verbs:
     - get
+# CRD Vote
+- apiGroups:
+    - ibp.com
+  resources:
+    - votes
+  verbs:
+    - get
+    - list
+    - watch
+    - update
+    - patch
+- apiGroups:
+    - ibp.com
+  resources:
+    - votes/status
+  verbs:
+    - get

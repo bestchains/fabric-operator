@@ -96,10 +96,8 @@ spec:
             timeoutSeconds: 5
             periodSeconds: 5
           env:
-            - name: WATCH_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+            - name: OPERATOR_NAMESPACE
+              value: "test-network"
             - name: POD_NAME
               valueFrom:
                 fieldRef:

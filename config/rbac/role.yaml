@@ -96,7 +96,9 @@ rules:
       - "rbac.authorization.k8s.io"
     resources:
       - roles
+      - clusterroles
       - rolebindings
+      - clusterrolebindings
     verbs:
       - get
       - list
