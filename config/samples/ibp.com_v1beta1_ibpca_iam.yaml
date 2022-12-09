@@ -25,6 +25,9 @@ spec:
     renew: {}
   configoverride:
     ca:
+      iam:
+        enabled: true
+        url: "http://localhost:333"
       registry:
         identities:
           - name: orgadmin
