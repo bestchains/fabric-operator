@@ -55,8 +55,9 @@ type Override interface {
 	AdminRole(v1.Object, *rbacv1.Role, resources.Action) error
 	AdminRoleBinding(v1.Object, *rbacv1.RoleBinding, resources.Action) error
 	AdminClusterRoleBinding(v1.Object, *rbacv1.ClusterRoleBinding, resources.Action) error
-
 	ClientRole(v1.Object, *rbacv1.Role, resources.Action) error
+
+	CertificateAuthority(v1.Object, *current.IBPCA, resources.Action) error
 }
 
 //go:generate counterfeiter -o mocks/initializer.go -fake-name InitializerOrganization . InitializerOrganization
@@ -87,17 +88,20 @@ type BaseOrganization struct {
 
 	Override Override
 
-	AdminRoleManager        resources.Manager
-	AdminRoleBindingManager resources.Manager
-
+	AdminRoleManager               resources.Manager
+	AdminRoleBindingManager        resources.Manager
 	AdminClusterRoleBindingManager resources.Manager
+	ClientRoleManager              resources.Manager
 
-	ClientRoleManager resources.Manager
+	CAManager resources.Manager
 }
 
 func New(client controllerclient.Client, scheme *runtime.Scheme, config *config.Config) *BaseOrganization {
 	o := &override.Override{
-		Client: client,
+		Client:        client,
+		IngressDomain: config.Operator.IngressDomain,
+		IAMEnabled:    config.Operator.IAM.Enabled,
+		IAMServer:     config.Operator.IAM.Server,
 	}
 	base := &BaseOrganization{
 		Client:   client,
@@ -122,6 +126,8 @@ func (organization *BaseOrganization) CreateManagers() {
 	organization.AdminClusterRoleBindingManager = mgr.CreateClusterRoleBindingManager("", override.AdminClusterRoleBinding, organization.GetLabels, organization.Config.OrganizationInitConfig.AdminClusterRoleBindingFile)
 
 	organization.ClientRoleManager = mgr.CreateRoleManager("", override.ClientRole, organization.GetLabels, organization.Config.OrganizationInitConfig.ClientRoleFile)
+
+	organization.CAManager = mgr.CreateCAManager("", override.CertificateAuthority, organization.GetLabels, organization.Config.OrganizationInitConfig.CAFile)
 }
 
 // Reconcile on Organization upon Update
@@ -170,6 +176,12 @@ func (organization *BaseOrganization) ReconcileManagers(instance *current.Organi
 		return err
 	}
 
+	// Deploy CA
+	err = organization.CAManager.Reconcile(instance, true)
+	if err != nil {
+		return err
+	}
+
 	// AdminRole
 	err = organization.AdminRoleManager.Reconcile(instance, false)
 	if err != nil {
@@ -195,13 +207,13 @@ func (organization *BaseOrganization) ReconcileManagers(instance *current.Organi
 		}
 	}
 
-	if update.AdminUpdated() {
+	//	Patch admin annotations to new Admin User(Only when subject kind is User)
+	if update.AdminUpdated() && organization.Config.OrganizationInitConfig.IAMEnabled {
 		err = organization.PatchAnnotations(instance)
 		if err != nil {
 			return err
 		}
 	}
-	// TODO: Deploy CA
 
 	return nil
 }
@@ -287,7 +299,7 @@ func SetAdminAnnotations(iamuser *iam.User, instance *current.Organization) erro
 
 	adminAnnotation := instance.GetAdminAnnotations()
 
-	_, err = annotationList.SetOrUpdateAnnotation(instance.GetName(), adminAnnotation)
+	_, err = annotationList.SetOrUpdateAnnotation(instance.GetAnnotationKey(), adminAnnotation)
 	if err != nil {
 		return err
 	}

@@ -30,7 +30,7 @@ func (organization *Organization) GetUserNamespace() string {
 }
 
 func (organization *Organization) GetCA() NamespacedName {
-	return NamespacedName{Namespace: organization.GetUserNamespace(), Name: organization.GetName() + "-ca"}
+	return NamespacedName{Namespace: organization.GetUserNamespace(), Name: organization.GetName()}
 }
 
 func (organization *Organization) GetAdminRole() string {
@@ -47,6 +47,10 @@ func (organization *Organization) GetAdminClusterRole() string {
 
 func (organization *Organization) GetRoleBinding(role string) string {
 	return role + "-binding"
+}
+
+func (organization *Organization) GetAnnotationKey() string {
+	return organization.GetName()
 }
 
 func (organization *Organization) GetAdminAnnotations() BlockchainAnnotation {

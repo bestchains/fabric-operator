@@ -9,20 +9,7 @@ rules:
     - ibp.com
   resources:
     - organizations
-  verbs:
-    - create
-    - get
-    - list
-- apiGroups:
-    - ibp.com
-  resources:
-    - organizations/status
-  verbs:
-    - get
-# CRD Proposal
-- apiGroups:
-    - ibp.com
-  resources:
+    - federations
     - proposals
   verbs:
     - create
@@ -31,6 +18,8 @@ rules:
 - apiGroups:
     - ibp.com
   resources:
+    - organizations/status
+    - federations/status
     - proposals/status
   verbs:
     - get

@@ -106,6 +106,6 @@ func (annotations *BlockchainAnnotationList) DeleteAnnotation(k string) error {
 		return nil
 	}
 	delete(annotations.List, k)
-	annotations.LastAppliedTime = time.Now().String()
+	annotations.LastDeleteTime = time.Now().String()
 	return nil
 }

@@ -26,6 +26,7 @@ import (
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/clusterrolebinding"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/configmap"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/deployment"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/ibpca"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/ingress"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/ingressv1beta1"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/orderernode"
@@ -55,6 +56,17 @@ func New(client k8sclient.Client, scheme *runtime.Scheme) *Manager {
 	return &Manager{
 		Client: client,
 		Scheme: scheme,
+	}
+}
+
+func (m *Manager) CreateCAManager(name string, oFunc func(v1.Object, *current.IBPCA, resources.Action) error, labelsFunc func(v1.Object) map[string]string, caFile string) *ibpca.Manager {
+	return &ibpca.Manager{
+		Client:       m.Client,
+		Scheme:       m.Scheme,
+		CAFile:       caFile,
+		LabelsFunc:   labelsFunc,
+		Name:         name,
+		OverrideFunc: oFunc,
 	}
 }
 

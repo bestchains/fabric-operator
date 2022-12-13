@@ -6,5 +6,5 @@ spec:
   license:
     accept: true
   displayName: "test organization"
-  admin: org1admin
+  admin: org3admin
   description: "test org3"

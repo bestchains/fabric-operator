@@ -10,7 +10,6 @@ spec:
   policy: "ALL"
   members:
     - name: org1
-      namespace: org1
       initiator: true
     - name: org2
       namespace: org2

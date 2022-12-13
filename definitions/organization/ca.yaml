@@ -9,17 +9,48 @@ spec:
   configoverride:
     ca:
       iam:
-        enabled: true
-        url: "http://localhost:333"
+        enabled: false
+        url: "http://localhost:333" # To be replaced
       debug: true
       signing:
         default:
           expiry: 87600h0m0s
     tlsca:
       iam:
-        enabled: true
-        url: "http://localhost:333"
+        enabled: false
+        url: "http://localhost:333" # To be replaced
       debug: true
       signing:
         default:
           expiry: 87600h0m0s
+  images:
+    caImage: "hyperledgerk8s/fabric-ca"
+    caTag: "iam"
+    caInitImage: "hyperledgerk8s/ubi-minimal"
+    caInitTag: latest
+  license:
+    accept: true
+  replicas: 1
+  resources:
+    ca:
+      limits:
+        cpu: 100m
+        memory: 200M
+      requests:
+        cpu: 10m
+        memory: 10M
+    init:
+      limits:
+        cpu: 100m
+        memory: 200M
+      requests:
+        cpu: 10m
+        memory: 10M
+  service:
+    type: ClusterIP
+  storage:
+    ca:
+      class: "standard"
+      size: 100M
+  version: 1.5.5
+

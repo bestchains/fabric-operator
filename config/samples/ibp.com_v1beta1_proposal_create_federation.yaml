@@ -7,6 +7,5 @@ spec:
   federation: federation-sample
   policy: All
   initiator:
-    namespace: org1
     name: org1
   createFederation: {}

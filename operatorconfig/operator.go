@@ -80,14 +80,21 @@ func load(config []byte, operator *Operator) error {
 
 // Operator defines operator configuration parameters
 type Operator struct {
-	Orderer  Orderer            `json:"orderer" yaml:"orderer"`
-	Peer     Peer               `json:"peer" yaml:"peer"`
-	CA       CA                 `json:"ca" yaml:"ca"`
-	Console  Console            `json:"console" yaml:"console"`
-	Restart  Restart            `json:"restart" yaml:"restart"`
-	Versions *deployer.Versions `json:"versions,omitempty" yaml:"versions,omitempty"`
-	Globals  Globals            `json:"globals,omitempty" yaml:"globals,omitempty" envconfig:"optional"`
-	Debug    Debug              `json:"debug" yaml:"debug"`
+	IngressDomain string             `json:"ingressDomain" yaml:"ingressDomain"`
+	IAM           IAM                `json:"iam" yaml:"iam"`
+	Orderer       Orderer            `json:"orderer" yaml:"orderer"`
+	Peer          Peer               `json:"peer" yaml:"peer"`
+	CA            CA                 `json:"ca" yaml:"ca"`
+	Console       Console            `json:"console" yaml:"console"`
+	Restart       Restart            `json:"restart" yaml:"restart"`
+	Versions      *deployer.Versions `json:"versions,omitempty" yaml:"versions,omitempty"`
+	Globals       Globals            `json:"globals,omitempty" yaml:"globals,omitempty" envconfig:"optional"`
+	Debug         Debug              `json:"debug" yaml:"debug"`
+}
+
+type IAM struct {
+	Enabled bool   `json:"enabled" yaml:"enabled"`
+	Server  string `json:"server" yaml:"server"`
 }
 
 // CA defines configurable properties for CA custom resource
@@ -159,6 +166,8 @@ type Console struct {
 // SetDefaults will set defaults as defined by to the operator configuration settings
 func (o *Operator) SetDefaults() {
 	*o = Operator{
+		IngressDomain: "local.st",
+		IAM:           IAM{Enabled: false},
 		Orderer: Orderer{
 			Timeouts: OrdererTimeouts{
 				SecretPoll: common.MustParseDuration("30s"),

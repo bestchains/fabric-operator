@@ -23,11 +23,11 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/pkg/errors"
-
+	iam "github.com/IBM-Blockchain/fabric-operator/api/iam/v1alpha1"
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
 	k8sclient "github.com/IBM-Blockchain/fabric-operator/pkg/k8s/controllerclient"
 	"github.com/go-test/deep"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -134,6 +134,18 @@ func (r *ReconcileOrganization) PredictOrganizationUpdate(oldOrg *current.Organi
 
 	if oldOrg.Spec.Admin != newOrg.Spec.Admin {
 		update.adminUpdated = true
+		if r.Config.OrganizationInitConfig.IAMEnabled {
+			// delete annotations from previous Admin
+			oldAdminUser, err := r.GetIAMUser(oldOrg.Spec.Admin)
+			if err != nil {
+				log.Error(err, fmt.Sprintf("failed to get iam user %s", oldOrg.Spec.Admin))
+			} else {
+				err = r.DeleteBlockchainAnnotations(oldOrg, oldAdminUser)
+				if err != nil {
+					log.Error(err, fmt.Sprintf("failed to delete annotation %s for %s", oldOrg.GetAnnotationKey(), oldOrg.Spec.Admin))
+				}
+			}
+		}
 	}
 
 	r.PushUpdate(oldOrg.Name, update)
@@ -171,12 +183,34 @@ func (r *ReconcileOrganization) PredictFederationUpdate(oldFed *current.Federati
 func (r *ReconcileOrganization) DeleteFunc(e event.DeleteEvent) bool {
 	var reconcile bool
 	switch e.Object.(type) {
+	case *current.Organization:
+		organiation := e.Object.(*current.Organization)
+		log.Info(fmt.Sprintf("Delete event detected for organization '%s'", organiation.GetName()))
+		reconcile = r.PredictOrganizationDelete(organiation)
 	case *current.Federation:
 		federation := e.Object.(*current.Federation)
 		log.Info(fmt.Sprintf("Delete event detected for federation '%s'", federation.GetName()))
 		reconcile = r.PredictFederationDelete(federation)
 	}
 	return reconcile
+}
+
+func (r *ReconcileOrganization) PredictOrganizationDelete(organization *current.Organization) bool {
+	if r.Config.OrganizationInitConfig.IAMEnabled {
+		userList, err := r.GetIAMUsers(organization.GetName())
+		if err != nil {
+			log.Error(err, fmt.Sprintf("failed to get iam users with organization annotation key %s", organization.GetAnnotationKey()))
+		} else {
+			for _, iamuser := range userList.Items {
+				err = r.DeleteBlockchainAnnotations(organization, &iamuser)
+				if err != nil {
+					log.Error(err, fmt.Sprintf("failed to delete annotation %s for %s", organization.GetAnnotationKey(), iamuser.GetName()))
+				}
+			}
+		}
+	}
+
+	return false
 }
 
 func (r *ReconcileOrganization) PredictFederationDelete(federation *current.Federation) bool {
@@ -258,5 +292,63 @@ func (r *ReconcileOrganization) DeleteFed(m current.Member, federation *current.
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (r *ReconcileOrganization) GetIAMUser(username string) (*iam.User, error) {
+	var err error
+	iamuser := &iam.User{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: username}, iamuser)
+	if err != nil {
+		return nil, err
+	}
+	return iamuser, nil
+}
+
+func (r *ReconcileOrganization) GetIAMUsers(annotationKey string) (*iam.UserList, error) {
+	userList := &iam.UserList{}
+	err := r.client.List(context.TODO(), userList, &client.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return userList, nil
+}
+
+func (r *ReconcileOrganization) DeleteBlockchainAnnotations(instance *current.Organization, iamuser *iam.User) error {
+	var err error
+
+	annotationList := &current.BlockchainAnnotationList{
+		List: make(map[string]current.BlockchainAnnotation),
+	}
+
+	err = annotationList.Unmarshal([]byte(iamuser.Annotations[current.BlockchainAnnotationKey]))
+	if err != nil {
+		return err
+	}
+
+	err = annotationList.DeleteAnnotation(instance.GetAnnotationKey())
+	if err != nil {
+		return err
+	}
+
+	raw, err := annotationList.Marshal()
+	if err != nil {
+		return err
+	}
+
+	iamuser.Annotations[current.BlockchainAnnotationKey] = string(raw)
+
+	err = r.client.Patch(context.TODO(), iamuser, nil, k8sclient.PatchOption{
+		Resilient: &k8sclient.ResilientPatch{
+			Retry:    2,
+			Into:     &iam.User{},
+			Strategy: client.MergeFrom,
+		},
+	})
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

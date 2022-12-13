@@ -65,7 +65,7 @@ type LDAP struct {
 
 type IAM struct {
 	Enabled *bool  `json:"enabled,omitempty"`
-	URL     string `jsoN:"url,omitempty"`
+	URL     string `json:"url,omitempty"`
 	// TODO: Define tls sections
 }
 

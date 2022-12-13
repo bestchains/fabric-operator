@@ -24,7 +24,9 @@ import (
 )
 
 type Override struct {
-	Client controllerclient.Client
-
-	SubjectKind clusterrolebinding.SubjectKind
+	Client        controllerclient.Client
+	SubjectKind   clusterrolebinding.SubjectKind
+	IngressDomain string
+	IAMEnabled    bool
+	IAMServer     string
 }

@@ -19,6 +19,7 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 	"time"
 
@@ -84,6 +85,8 @@ func main() {
 	setDefaultNetworkDefinitions(operatorCfg)
 
 	operatorCfg.Operator.SetDefaults()
+
+	setOperatorConfigFromEnvironment(operatorCfg)
 
 	if err := command.Operator(operatorCfg); err != nil {
 		log.Error(err, "failed to start operator")
@@ -212,10 +215,12 @@ func setDefaultConsoleDefinitions(cfg *config.Config) {
 
 func setDefaultOrganizationDefinitions(cfg *config.Config) {
 	cfg.OrganizationInitConfig = &orginit.Config{
+		IAMEnabled:                  os.Getenv("OPERATOR_USER_TYPE") != "sa",
 		AdminRoleFile:               filepath.Join(defaultOrganizationDef, "admin_role.yaml"),
 		AdminRoleBindingFile:        filepath.Join(defaultOrganizationDef, "admin_role_binding.yaml"),
 		AdminClusterRoleBindingFile: filepath.Join(defaultOrganizationDef, "admin_clusterrole_binding.yaml"),
 		ClientRoleFile:              filepath.Join(defaultOrganizationDef, "client_role.yaml"),
+		CAFile:                      filepath.Join(defaultOrganizationDef, "ca.yaml"),
 		StoragePath:                 "/tmp/orginit",
 	}
 }
@@ -239,5 +244,15 @@ func setDefaultVoteDefinitions(cfg *config.Config) {
 		RoleFile:           filepath.Join(defaultVoteDef, "role.yaml"),
 		ServiceAccountFile: filepath.Join(defaultVoteDef, "serviceaccount.yaml"),
 		RoleBindingFile:    filepath.Join(defaultVoteDef, "rolebinding.yaml"),
+	}
+}
+
+func setOperatorConfigFromEnvironment(cfg *config.Config) {
+	if domain := os.Getenv("OPERATOR_INGRESS_DOMAIN"); domain != "" {
+		cfg.Operator.IngressDomain = domain
+	}
+	if iamServer := os.Getenv("OPERATOR_IAM_SERVER"); iamServer != "" {
+		cfg.Operator.IAM.Enabled = true
+		cfg.Operator.IAM.Server = iamServer
 	}
 }

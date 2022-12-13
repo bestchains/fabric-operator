@@ -78,23 +78,6 @@ rules:
     - ibpcas/status
   verbs:
     - get
-# CRD Federation
-- apiGroups:
-    - ibp.com
-  resources:
-    - federations
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - watch
-- apiGroups:
-    - ibp.com
-  resources:
-    - federations/status
-  verbs:
-    - get
 # CRD Network
 - apiGroups:
     - ibp.com
