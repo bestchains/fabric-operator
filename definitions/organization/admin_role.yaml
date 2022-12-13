@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: admin-role
+  name: blockchain:admin-role
 rules:
 - apiGroups:
     - ""
@@ -14,6 +14,21 @@ rules:
     - get
     - list
     - watch
+- apiGroups:
+    - "rbac.authorization.k8s.io"
+  resources:
+    - roles
+    - rolebindings
+  verbs:
+    - get
+    - list
+    - create
+    - update
+    - patch
+    - watch
+    - delete
+    - deletecollection
+    - bind
 # CRD IBPPeer
 - apiGroups:
     - ibp.com
@@ -61,24 +76,6 @@ rules:
     - ibp.com
   resources:
     - ibpcas/status
-  verbs:
-    - get
-# CRD Organization
-- apiGroups:
-    - ibp.com
-  resources:
-    - organizations
-  verbs:
-    - create
-    - get
-    - list
-    - watch
-    - update
-    - patch
-- apiGroups:
-    - ibp.com
-  resources:
-    - organizations/status
   verbs:
     - get
 # CRD Federation

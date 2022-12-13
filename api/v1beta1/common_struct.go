@@ -381,3 +381,32 @@ const (
 	Majority    Policy = "Majority"
 	ALL         Policy = "All"
 )
+
+const BlockchainAnnotationKey = "bestchains"
+
+type BlockchainAnnotation struct {
+	// Organization info
+	Organization string `json:"organization,omitempty"`
+	Namespace    string `json:"namespace,omitempty"`
+
+	// Managed Peers & Orderers
+	Peers    map[string]string `json:"peers,omitempty"`
+	Orderers map[string]string `json:"orderers,omitempty"`
+
+	// Enrollment
+	EnrollmentID           string `json:"hf.EnrollmentID,omitempty"`
+	Type                   string `json:"hf.Type,omitempty"`
+	Affiliation            string `json:"hf.Affiliation,omitempty"`
+	RegistrarRoles         string `json:"hf.Registrar.Roles,omitempty"`
+	RegistrarDelegateRoles string `json:"hf.Registrar.DelegateRoles,omitempty"`
+	Revoker                string `json:"hf.Revoker,omitempty"`
+	IntermediateCA         string `json:"hf.IntermediateCA,omitempty"`
+	GenCRL                 string `json:"hf.GenCRL,omitempty"`
+	RegistrarAttributes    string `json:"hf.Registrar.Attributes,omitempty"`
+}
+
+type BlockchainAnnotationList struct {
+	List            map[string]BlockchainAnnotation `json:"list,omitempty"`
+	LastAppliedTime string                          `json:"lastAppliedTime,omitempty"`
+	LastDeleteTime  string                          `json:"lastDeleteTime,omitempty"`
+}

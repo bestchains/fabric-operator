@@ -39,10 +39,10 @@ func (r *ReconcileOrganization) CreateFunc(e event.CreateEvent) bool {
 	switch e.Object.(type) {
 	case *current.Organization:
 		organization := e.Object.(*current.Organization)
-		log.Info(fmt.Sprintf("Create event detected for organization '%s'", organization.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Create event detected for organization '%s'", organization.GetName()))
 		reconcile = r.PredictOrganizationCreate(organization)
 		if reconcile {
-			log.Info(fmt.Sprintf("Create event triggering reconcile for creating organization '%s'", organization.GetNamespacedName()))
+			log.Info(fmt.Sprintf("Create event triggering reconcile for creating organization '%s'", organization.GetName()))
 		}
 
 	case *current.Federation:
@@ -56,11 +56,11 @@ func (r *ReconcileOrganization) CreateFunc(e event.CreateEvent) bool {
 func (r *ReconcileOrganization) PredictOrganizationCreate(organization *current.Organization) bool {
 	update := Update{}
 	if organization.HasType() {
-		log.Info(fmt.Sprintf("Operator restart detected, running update flow on existing organization '%s'", organization.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Operator restart detected, running update flow on existing organization '%s'", organization.GetName()))
 
 		cm, err := r.GetSpecState(organization)
 		if err != nil {
-			log.Info(fmt.Sprintf("Failed getting saved organization spec '%s', triggering create: %s", organization.GetNamespacedName(), err.Error()))
+			log.Info(fmt.Sprintf("Failed getting saved organization spec '%s', triggering create: %s", organization.GetName(), err.Error()))
 			return true
 		}
 
@@ -68,25 +68,25 @@ func (r *ReconcileOrganization) PredictOrganizationCreate(organization *current.
 		existingOrg := &current.Organization{}
 		err = yaml.Unmarshal(specBytes, &existingOrg.Spec)
 		if err != nil {
-			log.Info(fmt.Sprintf("Unmarshal failed for saved organization spec '%s', triggering create: %s", organization.GetNamespacedName(), err.Error()))
+			log.Info(fmt.Sprintf("Unmarshal failed for saved organization spec '%s', triggering create: %s", organization.GetName(), err.Error()))
 			return true
 		}
 
 		diff := deep.Equal(organization.Spec, existingOrg.Spec)
 		if diff != nil {
-			log.Info(fmt.Sprintf("Organization '%s' spec was updated while operator was down", organization.GetNamespacedName()))
+			log.Info(fmt.Sprintf("Organization '%s' spec was updated while operator was down", organization.GetName()))
 			log.Info(fmt.Sprintf("Difference detected: %s", diff))
 			update.specUpdated = true
 		}
-		if organization.Spec.Admin != existingOrg.Spec.Admin || organization.Spec.CAReference.Name != existingOrg.Spec.CAReference.Name {
-			update.adminOrCAUpdated = true
+		if organization.Spec.Admin != existingOrg.Spec.Admin {
+			update.adminUpdated = true
 		}
-		r.PushUpdate(organization.GetNamespacedName(), update)
+		r.PushUpdate(organization.GetName(), update)
 		return true
 	}
 
-	update.adminOrCAUpdated = true
-	r.PushUpdate(organization.GetNamespacedName(), update)
+	update.adminUpdated = true
+	r.PushUpdate(organization.GetName(), update)
 	return true
 }
 
@@ -110,7 +110,7 @@ func (r *ReconcileOrganization) UpdateFunc(e event.UpdateEvent) bool {
 	case *current.Organization:
 		oldOrg := e.ObjectOld.(*current.Organization)
 		newOrg := e.ObjectNew.(*current.Organization)
-		log.Info(fmt.Sprintf("Update event detected for organization '%s'", oldOrg.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Update event detected for organization '%s'", oldOrg.GetName()))
 
 		reconcile = r.PredictOrganizationUpdate(oldOrg, newOrg)
 
@@ -132,11 +132,11 @@ func (r *ReconcileOrganization) PredictOrganizationUpdate(oldOrg *current.Organi
 		return false
 	}
 
-	if oldOrg.Spec.Admin != newOrg.Spec.Admin || oldOrg.Spec.CAReference.Name != newOrg.Spec.CAReference.Name {
-		update.adminOrCAUpdated = true
+	if oldOrg.Spec.Admin != newOrg.Spec.Admin {
+		update.adminUpdated = true
 	}
 
-	r.PushUpdate(oldOrg.GetNamespacedName(), update)
+	r.PushUpdate(oldOrg.Name, update)
 
 	log.Info(fmt.Sprintf("Spec update triggering reconcile on Organization custom resource %s: update [ %+v ]", oldOrg.Name, update.GetUpdateStackWithTrues()))
 

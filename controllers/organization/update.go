@@ -26,16 +26,16 @@ import (
 
 // Update defines a list of elements that we detect spec updates on
 type Update struct {
-	specUpdated      bool
-	adminOrCAUpdated bool
+	specUpdated  bool
+	adminUpdated bool
 }
 
 func (u *Update) SpecUpdated() bool {
 	return u.specUpdated
 }
 
-func (u *Update) AdminOrCAUpdated() bool {
-	return u.adminOrCAUpdated
+func (u *Update) AdminUpdated() bool {
+	return u.adminUpdated
 }
 
 // GetUpdateStackWithTrues is a helper method to print updates that have been detected
@@ -46,8 +46,8 @@ func (u *Update) GetUpdateStackWithTrues() string {
 		stack += "specUpdated "
 	}
 
-	if u.AdminOrCAUpdated() {
-		stack += "adminOrCAUpdated "
+	if u.AdminUpdated() {
+		stack += "adminUpdated "
 	}
 
 	if len(stack) == 0 {
@@ -67,13 +67,13 @@ func (r *ReconcileOrganization) GetUpdateStatusAtElement(instance *current.Organ
 	defer r.mutex.Unlock()
 
 	update := Update{}
-	_, ok := r.update[instance.GetNamespacedName()]
+	_, ok := r.update[instance.Name]
 	if !ok {
 		return &update
 	}
 
-	if len(r.update[instance.GetNamespacedName()]) >= 1 {
-		update = r.update[instance.GetNamespacedName()][index]
+	if len(r.update[instance.Name]) >= 1 {
+		update = r.update[instance.Name][index]
 	}
 
 	return &update

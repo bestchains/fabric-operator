@@ -1,0 +1,20 @@
+apiVersion: iam.tenxcloud.com/v1alpha1
+kind: User
+metadata:
+  labels:
+    t7d.io.username: org1admin
+  name: org1admin
+spec:
+  description: org1admin 用户信息的描述
+  email: org1admin@tenxcloud.com
+  groups:
+  - observability
+  - system:nodes
+  - system:masters
+  - resource-reader
+  - iam.tenxcloud.com
+  - observability
+  name: org1admin
+  password: $2a$10$693K.zP98yCs1qVwEp//DuWYOtLIE1doihtGhcCyYh3IpgSdGGba2
+  phone: "18890901212"
+  role: admin

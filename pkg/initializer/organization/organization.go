@@ -19,5 +19,9 @@
 package organization
 
 type Config struct {
-	StoragePath string
+	AdminRoleFile               string
+	AdminRoleBindingFile        string
+	AdminClusterRoleBindingFile string
+	ClientRoleFile              string
+	StoragePath                 string
 }

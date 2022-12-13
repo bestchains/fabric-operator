@@ -19,17 +19,26 @@
 package organization
 
 import (
+	"context"
 	"fmt"
 
+	iam "github.com/IBM-Blockchain/fabric-operator/api/iam/v1alpha1"
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
 	config "github.com/IBM-Blockchain/fabric-operator/operatorconfig"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/k8s/controllerclient"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/manager"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/offering/base/organization/override"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/offering/common"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/operatorerrors"
 	"github.com/IBM-Blockchain/fabric-operator/version"
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -39,17 +48,20 @@ var log = logf.Log.WithName("base_organization")
 
 type Update interface {
 	SpecUpdated() bool
-	AdminOrCAUpdated() bool
+	AdminUpdated() bool
 }
 
 type Override interface {
+	AdminRole(v1.Object, *rbacv1.Role, resources.Action) error
+	AdminRoleBinding(v1.Object, *rbacv1.RoleBinding, resources.Action) error
+	AdminClusterRoleBinding(v1.Object, *rbacv1.ClusterRoleBinding, resources.Action) error
+
+	ClientRole(v1.Object, *rbacv1.Role, resources.Action) error
 }
 
 //go:generate counterfeiter -o mocks/initializer.go -fake-name InitializerOrganization . InitializerOrganization
 
-type InitializerOrganization interface {
-	CreateOrUpdateOrgMSPSecret(instance *current.Organization) error
-}
+type InitializerOrganization interface{}
 
 type Organization interface {
 	PreReconcileChecks(instance *current.Organization, update Update) error
@@ -72,13 +84,26 @@ type BaseOrganization struct {
 	Config *config.Config
 
 	Initializer InitializerOrganization
+
+	Override Override
+
+	AdminRoleManager        resources.Manager
+	AdminRoleBindingManager resources.Manager
+
+	AdminClusterRoleBindingManager resources.Manager
+
+	ClientRoleManager resources.Manager
 }
 
 func New(client controllerclient.Client, scheme *runtime.Scheme, config *config.Config) *BaseOrganization {
-	base := &BaseOrganization{
+	o := &override.Override{
 		Client: client,
-		Scheme: scheme,
-		Config: config,
+	}
+	base := &BaseOrganization{
+		Client:   client,
+		Scheme:   scheme,
+		Config:   config,
+		Override: o,
 	}
 
 	base.Initializer = NewInitializer(config.OrganizationInitConfig, scheme, client, base.GetLabels)
@@ -88,9 +113,16 @@ func New(client controllerclient.Client, scheme *runtime.Scheme, config *config.
 	return base
 }
 
-// TODO: leave this due to we might need managers in the future
-// - configmap manager
-func (organization *BaseOrganization) CreateManagers() {}
+func (organization *BaseOrganization) CreateManagers() {
+	override := organization.Override
+	mgr := manager.New(organization.Client, organization.Scheme)
+
+	organization.AdminRoleManager = mgr.CreateRoleManager("", override.AdminRole, organization.GetLabels, organization.Config.OrganizationInitConfig.AdminRoleFile)
+	organization.AdminRoleBindingManager = mgr.CreateRoleBindingManager("", override.AdminRoleBinding, organization.GetLabels, organization.Config.OrganizationInitConfig.AdminRoleBindingFile)
+	organization.AdminClusterRoleBindingManager = mgr.CreateClusterRoleBindingManager("", override.AdminClusterRoleBinding, organization.GetLabels, organization.Config.OrganizationInitConfig.AdminClusterRoleBindingFile)
+
+	organization.ClientRoleManager = mgr.CreateRoleManager("", override.ClientRole, organization.GetLabels, organization.Config.OrganizationInitConfig.ClientRoleFile)
+}
 
 // Reconcile on Organization upon Update
 func (organization *BaseOrganization) Reconcile(instance *current.Organization, update Update) (common.Result, error) {
@@ -116,10 +148,6 @@ func (organization *BaseOrganization) Reconcile(instance *current.Organization, 
 func (organization *BaseOrganization) PreReconcileChecks(instance *current.Organization, update Update) error {
 	log.Info(fmt.Sprintf("PreReconcileChecks on Organization %s", instance.GetName()))
 
-	if !instance.HasCARef() {
-		return errors.New("organization caRef is empty")
-	}
-
 	if !instance.HasAdmin() {
 		return errors.New("organization admin is empty")
 	}
@@ -130,18 +158,51 @@ func (organization *BaseOrganization) PreReconcileChecks(instance *current.Organ
 // Initialize on Organization upon Update
 func (organization *BaseOrganization) Initialize(instance *current.Organization, update Update) error {
 	log.Info(fmt.Sprintf("Checking if organization '%s' needs initialization", instance.GetName()))
-
-	if update.AdminOrCAUpdated() {
-		err := organization.Initializer.CreateOrUpdateOrgMSPSecret(instance)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
 // ReconcileManagers on Organization upon Update
 func (organization *BaseOrganization) ReconcileManagers(instance *current.Organization, update Update) error {
+	var err error
+
+	err = organization.CreateNamespace(instance)
+	if err != nil {
+		return err
+	}
+
+	// AdminRole
+	err = organization.AdminRoleManager.Reconcile(instance, false)
+	if err != nil {
+		return err
+	}
+
+	// ClientRole
+	err = organization.ClientRoleManager.Reconcile(instance, false)
+	if err != nil {
+		return err
+	}
+
+	// AdminRoleBinding
+	if update.AdminUpdated() {
+		err = organization.AdminRoleBindingManager.Reconcile(instance, true)
+		if err != nil {
+			return err
+		}
+		// AdminClusterRoleBinding
+		err = organization.AdminClusterRoleBindingManager.Reconcile(instance, true)
+		if err != nil {
+			return err
+		}
+	}
+
+	if update.AdminUpdated() {
+		err = organization.PatchAnnotations(instance)
+		if err != nil {
+			return err
+		}
+	}
+	// TODO: Deploy CA
+
 	return nil
 }
 
@@ -158,4 +219,85 @@ func (organization *BaseOrganization) CheckStates(instance *current.Organization
 // GetLabels from instance.GetLabels
 func (organization *BaseOrganization) GetLabels(instance v1.Object) map[string]string {
 	return instance.GetLabels()
+}
+
+func (organization *BaseOrganization) CreateNamespace(instance *current.Organization) error {
+	ns := &corev1.Namespace{
+		ObjectMeta: v1.ObjectMeta{
+			Name:   instance.GetUserNamespace(),
+			Labels: instance.GetLabels(),
+		},
+	}
+	ns.OwnerReferences = []v1.OwnerReference{
+		{
+			Kind:       "Organization",
+			APIVersion: "ibp.com/v1beta1",
+			Name:       instance.GetName(),
+			UID:        instance.GetUID(),
+		},
+	}
+	return organization.Client.CreateOrUpdate(context.TODO(), &corev1.Namespace{
+		ObjectMeta: v1.ObjectMeta{
+			Name:   instance.GetUserNamespace(),
+			Labels: instance.GetLabels(),
+		},
+	})
+}
+
+// Patch to annotations
+func (organization *BaseOrganization) PatchAnnotations(instance *current.Organization) error {
+	var err error
+
+	iamuser := &iam.User{}
+	err = organization.Client.Get(context.TODO(), types.NamespacedName{Name: instance.Spec.Admin}, iamuser)
+	if err != nil {
+		return err
+	}
+
+	err = SetAdminAnnotations(iamuser, instance)
+	if err != nil {
+		return err
+	}
+
+	err = organization.Client.Patch(context.TODO(), iamuser, nil, controllerclient.PatchOption{
+		Resilient: &controllerclient.ResilientPatch{
+			Retry:    2,
+			Into:     &iam.User{},
+			Strategy: client.MergeFrom,
+		},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func SetAdminAnnotations(iamuser *iam.User, instance *current.Organization) error {
+	var err error
+
+	annotationList := &current.BlockchainAnnotationList{
+		List: make(map[string]current.BlockchainAnnotation),
+	}
+	err = annotationList.Unmarshal([]byte(iamuser.Annotations[current.BlockchainAnnotationKey]))
+	if err != nil {
+		return err
+	}
+
+	adminAnnotation := instance.GetAdminAnnotations()
+
+	_, err = annotationList.SetOrUpdateAnnotation(instance.GetName(), adminAnnotation)
+	if err != nil {
+		return err
+	}
+
+	raw, err := annotationList.Marshal()
+	if err != nil {
+		return err
+	}
+
+	iamuser.Annotations[current.BlockchainAnnotationKey] = string(raw)
+
+	return nil
 }

@@ -38,6 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	apis "github.com/IBM-Blockchain/fabric-operator/api"
+	iamv1alpha1 "github.com/IBM-Blockchain/fabric-operator/api/iam/v1alpha1"
 	ibpv1beta1 "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
 	controller "github.com/IBM-Blockchain/fabric-operator/controllers"
 	oconfig "github.com/IBM-Blockchain/fabric-operator/operatorconfig"
@@ -63,6 +64,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(ibpv1beta1.AddToScheme(scheme))
+	utilruntime.Must(iamv1alpha1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 

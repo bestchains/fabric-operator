@@ -43,7 +43,7 @@ func (o *Override) SyncRoleBinding(instance *current.Vote, rb *rbacv1.RoleBindin
 	if err != nil {
 		return err
 	}
-	rb.Subjects = append(rb.Subjects, common.GetDefaultSubject(organization.Spec.Admin, organization.Namespace, o.SubjectKind))
+	rb.Subjects = append(rb.Subjects, common.GetDefaultSubject(organization.Spec.Admin, organization.GetUserNamespace(), o.SubjectKind))
 	rb.OwnerReferences = []v1.OwnerReference{
 		{
 			Kind:       "Vote",

@@ -39,19 +39,21 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	iamv1alpha1 "github.com/IBM-Blockchain/fabric-operator/api/iam/v1alpha1"
 	ibpv1beta1 "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
 	// +kubebuilder:scaffold:imports
 )
 
 const (
-	defaultConfigs       = "./defaultconfig"
-	defaultPeerDef       = "./definitions/peer"
-	defaultCADef         = "./definitions/ca"
-	defaultOrdererDef    = "./definitions/orderer"
-	defaultConsoleDef    = "./definitions/console"
-	defaultFederationDef = "./definitions/federation"
-	defaultNetworkDef    = "./definitions/network"
-	defaultVoteDef       = "./definitions/vote"
+	defaultConfigs         = "./defaultconfig"
+	defaultPeerDef         = "./definitions/peer"
+	defaultCADef           = "./definitions/ca"
+	defaultOrdererDef      = "./definitions/orderer"
+	defaultConsoleDef      = "./definitions/console"
+	defaultOrganizationDef = "./definitions/organization"
+	defaultFederationDef   = "./definitions/federation"
+	defaultVoteDef         = "./definitions/vote"
+	defaultNetworkDef      = "./definitions/network"
 )
 
 var log = logf.Log.WithName("cmd")
@@ -64,6 +66,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(ibpv1beta1.AddToScheme(scheme))
+	utilruntime.Must(iamv1alpha1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -209,7 +212,11 @@ func setDefaultConsoleDefinitions(cfg *config.Config) {
 
 func setDefaultOrganizationDefinitions(cfg *config.Config) {
 	cfg.OrganizationInitConfig = &orginit.Config{
-		StoragePath: "/tmp/orginit",
+		AdminRoleFile:               filepath.Join(defaultOrganizationDef, "admin_role.yaml"),
+		AdminRoleBindingFile:        filepath.Join(defaultOrganizationDef, "admin_role_binding.yaml"),
+		AdminClusterRoleBindingFile: filepath.Join(defaultOrganizationDef, "admin_clusterrole_binding.yaml"),
+		ClientRoleFile:              filepath.Join(defaultOrganizationDef, "client_role.yaml"),
+		StoragePath:                 "/tmp/orginit",
 	}
 }
 

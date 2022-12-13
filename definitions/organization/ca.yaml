@@ -1,0 +1,25 @@
+apiVersion: ibp.com/v1beta1
+kind: IBPCA
+metadata:
+  name: org0-ca
+  namespace: test-network
+spec:
+  license:
+    accept: true
+  configoverride:
+    ca:
+      iam:
+        enabled: true
+        url: "http://localhost:333"
+      debug: true
+      signing:
+        default:
+          expiry: 87600h0m0s
+    tlsca:
+      iam:
+        enabled: true
+        url: "http://localhost:333"
+      debug: true
+      signing:
+        default:
+          expiry: 87600h0m0s

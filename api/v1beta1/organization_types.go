@@ -43,15 +43,6 @@ type OrganizationSpec struct {
 	// Admin is the account with `Admin` role both in kubernets and in CA
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
 	Admin string `json:"admin,omitempty"`
-
-	// AdminSecret (Optional,k8s secret) stores the `Admin`'s crypto materials
-	// Will be {Organization.Name}-admin-secret by default
-	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
-	AdminSecret string `json:"adminSecret,omitempty"`
-
-	// CAReference reference to Organization's Certificate Authority
-	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
-	CAReference `json:"caReference,omitempty"`
 }
 
 // OrganizationStatus defines the observed state of Organization
@@ -67,6 +58,7 @@ type OrganizationStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Cluster,shortName=org;orgs
 
 // Organization is the Schema for the organizations API
 type Organization struct {

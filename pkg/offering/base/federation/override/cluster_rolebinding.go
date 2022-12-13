@@ -46,7 +46,7 @@ func (o *Override) CreateClusterRoleBinding(instance *current.Federation, crb *r
 		if err != nil {
 			return err
 		}
-		subjects = append(subjects, common.GetDefaultSubject(organization.Spec.Admin, organization.Namespace, o.SubjectKind))
+		subjects = append(subjects, common.GetDefaultSubject(organization.Spec.Admin, organization.GetUserNamespace(), o.SubjectKind))
 	}
 
 	crb.Subjects = subjects
@@ -72,7 +72,7 @@ func (o *Override) UpdateClusterRoleBinding(instance *current.Federation, crb *r
 		if err != nil {
 			return err
 		}
-		subjects = append(subjects, common.GetDefaultSubject(organization.Spec.Admin, organization.Namespace, o.SubjectKind))
+		subjects = append(subjects, common.GetDefaultSubject(organization.Spec.Admin, organization.GetUserNamespace(), o.SubjectKind))
 	}
 
 	crb.Subjects = subjects

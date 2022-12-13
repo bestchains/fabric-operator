@@ -208,3 +208,17 @@ rules:
       - patch
       - update
       - watch
+  - apiGroups:
+      - iam.tenxcloud.com
+    resources:
+      - users.iam.tenxcloud.com
+      - users
+    verbs:
+      - get
+      - list
+      - create
+      - update
+      - patch
+      - watch
+      - delete
+      - deletecollection

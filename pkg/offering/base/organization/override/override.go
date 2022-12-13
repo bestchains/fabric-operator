@@ -16,24 +16,15 @@
  * limitations under the License.
  */
 
-package organization
+package override
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/k8s/controllerclient"
+	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources/clusterrolebinding"
 )
 
-var _ = Describe("predicates", func() {
-	Context("organization upate", func() {
-		It("empty stack", func() {
-			update := &Update{}
-			Expect(update.GetUpdateStackWithTrues()).To(Equal("emptystack "))
-		})
-		It("full stack", func() {
-			update := &Update{
-				adminOrCAUpdated: true,
-			}
-			Expect(update.GetUpdateStackWithTrues()).To(Equal("adminOrCAUpdated "))
-		})
-	})
-})
+type Override struct {
+	Client controllerclient.Client
+
+	SubjectKind clusterrolebinding.SubjectKind
+}

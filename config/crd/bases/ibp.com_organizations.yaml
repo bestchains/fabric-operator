@@ -12,8 +12,11 @@ spec:
     kind: Organization
     listKind: OrganizationList
     plural: organizations
+    shortNames:
+    - org
+    - orgs
     singular: organization
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v1beta1
     schema:
@@ -39,20 +42,6 @@ spec:
                 description: Admin is the account with `Admin` role both in kubernets
                   and in CA
                 type: string
-              adminSecret:
-                description: AdminSecret (Optional,k8s secret) stores the `Admin`'s
-                  crypto materials Will be {Organization.Name}-admin-secret by default
-                type: string
-              caReference:
-                description: CAReference reference to Organization's Certificate Authority
-                properties:
-                  ca:
-                    description: CA indicates which `ca` (ca/tlsca) is being used
-                    type: string
-                  name:
-                    description: Name is the CA server name
-                    type: string
-                type: object
               description:
                 description: Description
                 type: string

@@ -113,7 +113,7 @@ func add(mgr manager.Manager, r *ReconcileOrganization) error {
 		return err
 	}
 
-	// Watch for changes to secrets
+	// Watch for changes to Federation
 	err = c.Watch(&source.Kind{Type: &current.Federation{}}, &handler.EnqueueRequestForObject{}, predicateFuncs)
 	if err != nil {
 		return err
@@ -181,14 +181,14 @@ func (r *ReconcileOrganization) Reconcile(ctx context.Context, request reconcile
 	}
 
 	update := r.GetUpdateStatus(instance)
-	reqLogger.Info(fmt.Sprintf("Reconciling Organization '%s' with update values of [ %+v ]", instance.GetNamespacedName(), update.GetUpdateStackWithTrues()))
+	reqLogger.Info(fmt.Sprintf("Reconciling Organization '%s' with update values of [ %+v ]", instance.GetName(), update.GetUpdateStackWithTrues()))
 
-	result, err := r.Offering.Reconcile(instance, r.PopUpdate(instance.GetNamespacedName()))
+	result, err := r.Offering.Reconcile(instance, r.PopUpdate(instance.GetName()))
 	if err != nil {
 		if setStatuErr := r.SetErrorStatus(instance, err); setStatuErr != nil {
 			return reconcile.Result{}, operatorerrors.IsBreakingError(setStatuErr, "failed to update status", log)
 		}
-		return reconcile.Result{}, operatorerrors.IsBreakingError(errors.Wrapf(err, "Organization instance '%s' encountered error", instance.GetNamespacedName()), "stopping reconcile loop", log)
+		return reconcile.Result{}, operatorerrors.IsBreakingError(errors.Wrapf(err, "Organization instance '%s' encountered error", instance.GetName()), "stopping reconcile loop", log)
 	} else {
 		setStatusErr := r.SetStatus(instance, result.Status)
 		if setStatusErr != nil {
@@ -197,16 +197,16 @@ func (r *ReconcileOrganization) Reconcile(ctx context.Context, request reconcile
 	}
 
 	if result.Requeue {
-		r.PushUpdate(instance.GetNamespacedName(), *update)
+		r.PushUpdate(instance.GetName(), *update)
 	}
 
-	reqLogger.Info(fmt.Sprintf("Finished reconciling Organization '%s' with update values of [ %+v ]", instance.GetNamespacedName(), update.GetUpdateStackWithTrues()))
+	reqLogger.Info(fmt.Sprintf("Finished reconciling Organization '%s' with update values of [ %+v ]", instance.GetName(), update.GetUpdateStackWithTrues()))
 
 	// If the stack still has items that require processing, keep reconciling
 	// until the stack has been cleared
-	_, found := r.update[instance.GetNamespacedName()]
+	_, found := r.update[instance.GetName()]
 	if found {
-		if len(r.update[instance.GetNamespacedName()]) > 0 {
+		if len(r.update[instance.GetName()]) > 0 {
 			return reconcile.Result{
 				Requeue: true,
 			}, nil
@@ -218,7 +218,7 @@ func (r *ReconcileOrganization) Reconcile(ctx context.Context, request reconcile
 
 // TODO: OrganizationStatus relevant
 func (r *ReconcileOrganization) SetStatus(instance *current.Organization, reconcileStatus *current.CRStatus) error {
-	log.Info(fmt.Sprintf("Setting status for '%s'", instance.GetNamespacedName()))
+	log.Info(fmt.Sprintf("Setting status for '%s'", instance.GetName()))
 
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}, instance)
 	if err != nil {
@@ -265,7 +265,7 @@ func (r *ReconcileOrganization) SetStatus(instance *current.Organization, reconc
 }
 
 func (r *ReconcileOrganization) SetErrorStatus(instance *current.Organization, reconcileErr error) error {
-	log.Info(fmt.Sprintf("Setting error status for '%s'", instance.GetNamespacedName()))
+	log.Info(fmt.Sprintf("Setting error status for '%s'", instance.GetName()))
 
 	var err error
 
@@ -309,7 +309,7 @@ func (r *ReconcileOrganization) SaveSpecState(instance *current.Organization) er
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-spec", instance.GetName()),
-			Namespace: instance.GetNamespace(),
+			Namespace: instance.GetUserNamespace(),
 			Labels:    instance.GetLabels(),
 		},
 		BinaryData: map[string][]byte{
@@ -332,7 +332,7 @@ func (r *ReconcileOrganization) GetSpecState(instance *current.Organization) (*c
 	cm := &corev1.ConfigMap{}
 	nn := types.NamespacedName{
 		Name:      fmt.Sprintf("%s-spec", instance.GetName()),
-		Namespace: instance.GetNamespace(),
+		Namespace: instance.GetUserNamespace(),
 	}
 
 	err := r.client.Get(context.TODO(), nn, cm)

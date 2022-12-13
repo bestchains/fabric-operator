@@ -1,10 +1,10 @@
 apiVersion: ibp.com/v1beta1
 kind: Organization
 metadata:
-  name: org1
+  name: org3
 spec:
   license:
     accept: true
   displayName: "test organization"
   admin: org1admin
-  description: "test org1"
+  description: "test org3"

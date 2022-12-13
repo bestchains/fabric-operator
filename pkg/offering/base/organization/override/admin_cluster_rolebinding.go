@@ -19,47 +19,42 @@
 package override
 
 import (
-	"context"
-
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
-	"github.com/IBM-Blockchain/fabric-operator/pkg/client"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/manager/resources"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/offering/common"
 	rbacv1 "k8s.io/api/rbac/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (o *Override) ClusterRoleBinding(object v1.Object, crb *rbacv1.ClusterRoleBinding, action resources.Action) error {
-	instance := object.(*current.Proposal)
+func (o *Override) AdminClusterRoleBinding(object v1.Object, crb *rbacv1.ClusterRoleBinding, action resources.Action) error {
+	instance := object.(*current.Organization)
 	switch action {
 	case resources.Create, resources.Update:
-		return o.SyncClusterRoleBinding(instance, crb)
+		return o.CreateAdminClusterRoleBinding(instance, crb)
 	}
 
 	return nil
 }
 
-func (o *Override) SyncClusterRoleBinding(instance *current.Proposal, crb *rbacv1.ClusterRoleBinding) error {
-	orgs, err := instance.GetCandidateOrganizations(context.TODO(), o.Client)
-	if err != nil {
-		return err
-	}
-	subjects := make([]rbacv1.Subject, 0)
+func (o *Override) CreateAdminClusterRoleBinding(instance *current.Organization, crb *rbacv1.ClusterRoleBinding) error {
+	crb.Name = instance.GetRoleBinding(instance.GetAdminClusterRole())
 
-	for _, org := range orgs {
-		organization, err := o.GetOrganization(org)
-		if err != nil {
-			return err
-		}
-		subjects = append(subjects, common.GetDefaultSubject(organization.Spec.Admin, organization.GetUserNamespace(), o.SubjectKind))
+	crb.Subjects = []rbacv1.Subject{
+		common.GetDefaultSubject(instance.Spec.Admin, instance.GetUserNamespace(), o.SubjectKind),
 	}
-	crb.Subjects = subjects
+
+	crb.RoleRef = rbacv1.RoleRef{
+		APIGroup: "rbac.authorization.k8s.io",
+		Kind:     "ClusterRole",
+		Name:     instance.GetAdminClusterRole(),
+	}
 
 	crb.OwnerReferences = []v1.OwnerReference{
 		{
-			Kind:       "Proposal",
-			APIVersion: client.SchemeGroupVersion.String(),
+			Kind:       "Organization",
+			APIVersion: "ibp.com/v1beta1",
 			Name:       instance.GetName(),
+			UID:        instance.GetUID(),
 		},
 	}
 

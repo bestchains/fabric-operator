@@ -1,6 +1,8 @@
 package v1beta1
 
-import "os"
+import (
+	"os"
+)
 
 func init() {
 	SchemeBuilder.Register(&Organization{}, &OrganizationList{})
@@ -23,39 +25,50 @@ func (organization *Organization) GetLabels() map[string]string {
 	}
 }
 
-func (organization *Organization) GetNamespacedName() string {
-	return organization.GetNamespace() + "-" + organization.GetName()
+func (organization *Organization) GetUserNamespace() string {
+	return organization.GetName()
 }
 
-func (organization *Organization) GetCAConnectinProfile() string {
-	return organization.Spec.CAReference.Name + "-connection-profile"
+func (organization *Organization) GetCA() NamespacedName {
+	return NamespacedName{Namespace: organization.GetUserNamespace(), Name: organization.GetName() + "-ca"}
 }
 
-func (organization *Organization) GetAdminSecretName() string {
-	if organization.Spec.AdminSecret != "" {
-		return organization.Spec.AdminSecret
+func (organization *Organization) GetAdminRole() string {
+	return organization.GetUserNamespace() + "blockchain:admin-role"
+}
+
+func (organization *Organization) GetClientRole() string {
+	return organization.GetUserNamespace() + "blockchain:client-role"
+}
+
+func (organization *Organization) GetAdminClusterRole() string {
+	return "blockchain:admin-cluster-role"
+}
+
+func (organization *Organization) GetRoleBinding(role string) string {
+	return role + "-binding"
+}
+
+func (organization *Organization) GetAdminAnnotations() BlockchainAnnotation {
+	return BlockchainAnnotation{
+		Organization: organization.GetName(),
+		Namespace:    organization.GetUserNamespace(),
+
+		// Enrollment parts
+		EnrollmentID:           organization.Spec.Admin,
+		Type:                   "admin",
+		Affiliation:            "",
+		RegistrarRoles:         "*",
+		RegistrarDelegateRoles: "*",
+		Revoker:                "*",
+		IntermediateCA:         "true",
+		GenCRL:                 "true",
+		RegistrarAttributes:    "*",
 	}
-	return organization.GetName() + "-admin-secret"
-}
-
-func (organization *Organization) GetAdminCryptoName() string {
-	return organization.GetNamespacedName() + "-admin-crypto"
-}
-
-func (organization *Organization) GetOrgMSPCryptoName() string {
-	return organization.GetNamespacedName() + "-organization-crypto"
-}
-
-func (organization *Organization) GetCACryptoName() string {
-	return organization.Spec.CAReference.Name + "-ca-crypto"
 }
 
 func (organization *Organization) HasDisplayName() bool {
 	return organization.Spec.DisplayName != ""
-}
-
-func (organization *Organization) HasCARef() bool {
-	return organization.Spec.CAReference.Name != ""
 }
 
 func (organization *Organization) HasAdmin() bool {

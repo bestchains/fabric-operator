@@ -19,8 +19,10 @@
 package v1beta1
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/IBM-Blockchain/fabric-operator/pkg/util"
 )
@@ -60,4 +62,50 @@ func (e *Enrollment) GetCATLSBytes() ([]byte, error) {
 
 func (nsn NamespacedName) String() string {
 	return nsn.Namespace + "-" + nsn.Name
+}
+
+func (annotations *BlockchainAnnotationList) Marshal() ([]byte, error) {
+	return json.Marshal(annotations)
+}
+
+func (annotations *BlockchainAnnotationList) Unmarshal(raw []byte) error {
+	if len(raw) == 0 {
+		return nil
+	}
+	return json.Unmarshal(raw, annotations)
+}
+
+func (annotations *BlockchainAnnotationList) GetAnnotation(k string) (BlockchainAnnotation, error) {
+	if annotations == nil {
+		return BlockchainAnnotation{}, errors.New("nil annotation list")
+	}
+	annotation, ok := annotations.List[k]
+	if !ok {
+		return BlockchainAnnotation{}, errors.New("annotation not exist")
+	}
+	return annotation, nil
+}
+func (annotations *BlockchainAnnotationList) SetOrUpdateAnnotation(k string, annotation BlockchainAnnotation) (bool, error) {
+	if annotations == nil {
+		return false, errors.New("nil annotation list")
+	}
+	_, ok := annotations.List[k]
+	annotations.List[k] = annotation
+
+	annotations.LastAppliedTime = time.Now().String()
+
+	return ok, nil
+}
+
+func (annotations *BlockchainAnnotationList) DeleteAnnotation(k string) error {
+	if annotations == nil {
+		return errors.New("nil annotation list")
+	}
+	_, ok := annotations.List[k]
+	if !ok {
+		return nil
+	}
+	delete(annotations.List, k)
+	annotations.LastAppliedTime = time.Now().String()
+	return nil
 }
