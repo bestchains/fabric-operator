@@ -3,7 +3,6 @@ apiVersion: ibp.com/v1beta1
 kind: Federation
 metadata:
   name: federation-sample
-  namespace: org1
 spec:
   license:
     accept: true

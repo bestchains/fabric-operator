@@ -40,7 +40,7 @@ func (r *ReconcileFederation) CreateFunc(e event.CreateEvent) bool {
 	switch e.Object.(type) {
 	case *current.Federation:
 		federation := e.Object.(*current.Federation)
-		log.Info(fmt.Sprintf("Create event detected for federation '%s'", federation.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Create event detected for federation '%s'", federation.GetName()))
 		reconcile = r.PredictFederationCreate(federation)
 
 	case *current.Network:
@@ -56,13 +56,13 @@ func (r *ReconcileFederation) PredictFederationCreate(federation *current.Federa
 	update := Update{}
 
 	if federation.HasType() {
-		log.Info(fmt.Sprintf("Operator restart detected, running update flow on existing federation '%s'", federation.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Operator restart detected, running update flow on existing federation '%s'", federation.GetName()))
 
 		// Get the spec state of the resource before the operator went down, this
 		// will be used to compare to see if the spec of resources has changed
 		cm, err := r.GetSpecState(federation)
 		if err != nil {
-			log.Info(fmt.Sprintf("Failed getting saved fedeation spec '%s', triggering create: %s", federation.GetNamespacedName(), err.Error()))
+			log.Info(fmt.Sprintf("Failed getting saved fedeation spec '%s', triggering create: %s", federation.GetName(), err.Error()))
 			return true
 		}
 
@@ -70,33 +70,33 @@ func (r *ReconcileFederation) PredictFederationCreate(federation *current.Federa
 		existingFed := &current.Federation{}
 		err = yaml.Unmarshal(specBytes, &existingFed.Spec)
 		if err != nil {
-			log.Info(fmt.Sprintf("Unmarshal failed for saved federation spec '%s', triggering create: %s", federation.GetNamespacedName(), err.Error()))
+			log.Info(fmt.Sprintf("Unmarshal failed for saved federation spec '%s', triggering create: %s", federation.GetName(), err.Error()))
 			return true
 		}
 
 		diff := deep.Equal(federation.Spec, existingFed.Spec)
 		if diff != nil {
-			log.Info(fmt.Sprintf("Federation '%s' spec was updated while operator was down", federation.GetNamespacedName()))
+			log.Info(fmt.Sprintf("Federation '%s' spec was updated while operator was down", federation.GetName()))
 			log.Info(fmt.Sprintf("Difference detected: %v", diff))
 			update.specUpdated = true
 		}
 
 		added, removed := current.DifferMembers(federation.Spec.Members, existingFed.Spec.Members)
 		if len(added) != 0 || len(removed) != 0 {
-			log.Info(fmt.Sprintf("Federation '%s' members was updated while operator was down", federation.GetNamespacedName()))
+			log.Info(fmt.Sprintf("Federation '%s' members was updated while operator was down", federation.GetName()))
 			log.Info(fmt.Sprintf("Difference detected: added members %v", added))
 			log.Info(fmt.Sprintf("Difference detected: removed members %v", removed))
 			update.memberUpdated = true
 		}
 
-		log.Info(fmt.Sprintf("Create event triggering reconcile for updating Federation '%s'", federation.GetNamespacedName()))
-		r.PushUpdate(federation.GetNamespacedName(), update)
+		log.Info(fmt.Sprintf("Create event triggering reconcile for updating Federation '%s'", federation.GetName()))
+		r.PushUpdate(federation.GetName(), update)
 		return true
 	}
 
 	update.specUpdated = true
 	update.memberUpdated = true
-	r.PushUpdate(federation.GetNamespacedName(), update)
+	r.PushUpdate(federation.GetName(), update)
 
 	return true
 }
@@ -104,17 +104,16 @@ func (r *ReconcileFederation) PredictFederationCreate(federation *current.Federa
 func (r *ReconcileFederation) PredictNetworkCreate(network *current.Network) bool {
 	err := r.AddNetwork(network.Spec.Federation, network.NamespacedName())
 	if err != nil {
-		log.Error(err, fmt.Sprintf("Network %s in Federation %s", network.GetNamespacedName(), network.Spec.Federation.String()))
+		log.Error(err, fmt.Sprintf("Network %s in Federation %s", network.GetNamespacedName(), network.Spec.Federation))
 	}
 	return false
 }
 
-func (r *ReconcileFederation) AddNetwork(fedns current.NamespacedName, netns current.NamespacedName) error {
+func (r *ReconcileFederation) AddNetwork(fedns string, netns current.NamespacedName) error {
 	var err error
 	federation := &current.Federation{}
 	err = r.client.Get(context.TODO(), types.NamespacedName{
-		Name:      fedns.Name,
-		Namespace: fedns.Namespace,
+		Name: fedns,
 	}, federation)
 	if err != nil {
 		return err
@@ -126,7 +125,7 @@ func (r *ReconcileFederation) AddNetwork(fedns current.NamespacedName, netns cur
 	})
 	// conflict detected,do not need to PatchStatus
 	if conflict {
-		return errors.Errorf("network %s already exist in federation %s", netns.String(), fedns.String())
+		return errors.Errorf("network %s already exist in federation %s", netns.String(), fedns)
 	}
 
 	err = r.client.PatchStatus(context.TODO(), federation, nil, k8sclient.PatchOption{
@@ -151,12 +150,12 @@ func (r *ReconcileFederation) UpdateFunc(e event.UpdateEvent) bool {
 	case *current.Federation:
 		oldFed := e.ObjectOld.(*current.Federation)
 		newFed := e.ObjectNew.(*current.Federation)
-		log.Info(fmt.Sprintf("Update event detected for federation '%s'", oldFed.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Update event detected for federation '%s'", oldFed.GetName()))
 		reconcile = r.PredicFederationUpdate(oldFed, newFed)
 	case *current.Proposal:
 		oldProposal := e.ObjectOld.(*current.Proposal)
 		newProposal := e.ObjectNew.(*current.Proposal)
-		log.Info(fmt.Sprintf("Update event detected for proposal '%s'", oldProposal.Spec.Federation.String()))
+		log.Info(fmt.Sprintf("Update event detected for proposal '%s'", oldProposal.Spec.Federation))
 		reconcile = r.PredicProposalUpdate(oldProposal, newProposal)
 	}
 	return reconcile
@@ -178,7 +177,7 @@ func (r *ReconcileFederation) PredicFederationUpdate(oldFed *current.Federation,
 		update.memberUpdated = true
 	}
 
-	r.PushUpdate(oldFed.GetNamespacedName(), update)
+	r.PushUpdate(oldFed.GetName(), update)
 
 	log.Info(fmt.Sprintf("Spec update triggering reconcile on Federation custom resource %s: update [ %+v ]", oldFed.Name, update.GetUpdateStackWithTrues()))
 
@@ -261,8 +260,8 @@ func (r *ReconcileFederation) PredicProposalUpdate(oldProposal *current.Proposal
 				} else if newProposal.Spec.AddMember != nil {
 					if c.Type == current.ProposalSucceeded {
 						fed := &current.Federation{}
-						if err := r.client.Get(context.TODO(), types.NamespacedName{Name: newProposal.Spec.Federation.Name, Namespace: newProposal.Spec.Federation.Namespace}, fed); err != nil {
-							log.Error(err, fmt.Sprintf("cant find federation %s", newProposal.Spec.Federation.String()))
+						if err := r.client.Get(context.TODO(), types.NamespacedName{Name: newProposal.Spec.Federation}, fed); err != nil {
+							log.Error(err, fmt.Sprintf("cant find federation %s", newProposal.Spec.Federation))
 							return false
 						}
 						for _, m := range newProposal.Spec.AddMember.Members {
@@ -272,15 +271,15 @@ func (r *ReconcileFederation) PredicProposalUpdate(oldProposal *current.Proposal
 							})
 						}
 						if err := r.client.Update(context.TODO(), fed); err != nil {
-							log.Error(err, fmt.Sprintf("cant update federation %s", newProposal.Spec.Federation.String()))
+							log.Error(err, fmt.Sprintf("cant update federation %s", newProposal.Spec.Federation))
 							return false
 						}
 					}
 				} else if newProposal.Spec.DeleteMember != nil {
 					if c.Type == current.ProposalSucceeded {
 						fed := &current.Federation{}
-						if err := r.client.Get(context.TODO(), types.NamespacedName{Name: newProposal.Spec.Federation.Name, Namespace: newProposal.Spec.Federation.Namespace}, fed); err != nil {
-							log.Error(err, fmt.Sprintf("cant find federation %s", newProposal.Spec.Federation.String()))
+						if err := r.client.Get(context.TODO(), types.NamespacedName{Name: newProposal.Spec.Federation}, fed); err != nil {
+							log.Error(err, fmt.Sprintf("cant find federation %s", newProposal.Spec.Federation))
 							return false
 						}
 						newMember := make([]current.Member, 0)
@@ -292,7 +291,7 @@ func (r *ReconcileFederation) PredicProposalUpdate(oldProposal *current.Proposal
 						}
 						fed.Spec.Members = newMember
 						if err := r.client.Update(context.TODO(), fed); err != nil {
-							log.Error(err, fmt.Sprintf("cant update federation %s", newProposal.Spec.Federation.String()))
+							log.Error(err, fmt.Sprintf("cant update federation %s", newProposal.Spec.Federation))
 							return false
 						}
 					}
@@ -300,8 +299,8 @@ func (r *ReconcileFederation) PredicProposalUpdate(oldProposal *current.Proposal
 					if c.Type == current.ProposalSucceeded {
 						update.proposalDissolved = true
 						fed := &current.Federation{}
-						if err := r.client.Get(context.TODO(), types.NamespacedName{Name: newProposal.Spec.Federation.Name, Namespace: newProposal.Spec.Federation.Namespace}, fed); err != nil {
-							log.Error(err, fmt.Sprintf("cant find federation %s", newProposal.Spec.Federation.String()))
+						if err := r.client.Get(context.TODO(), types.NamespacedName{Name: newProposal.Spec.Federation}, fed); err != nil {
+							log.Error(err, fmt.Sprintf("cant find federation %s", newProposal.Spec.Federation))
 							return false
 						}
 						newMember := make([]current.Member, 0)
@@ -313,7 +312,7 @@ func (r *ReconcileFederation) PredicProposalUpdate(oldProposal *current.Proposal
 						}
 						fed.Spec.Members = newMember
 						if err := r.client.Update(context.TODO(), fed); err != nil {
-							log.Error(err, fmt.Sprintf("cant update federation %s", newProposal.Spec.Federation.String()))
+							log.Error(err, fmt.Sprintf("cant update federation %s", newProposal.Spec.Federation))
 							return false
 						}
 					}
@@ -324,7 +323,62 @@ func (r *ReconcileFederation) PredicProposalUpdate(oldProposal *current.Proposal
 	if !(update.proposalDissolved || update.proposalActivated || update.proposalFailed) {
 		return false
 	}
-	r.PushUpdate(newProposal.Spec.Federation.String(), update)
-	log.Info(fmt.Sprintf("Proposal Status update triggering reconcile on Federation custom resource %s: update [ %+v ]", newProposal.Spec.Federation.String(), update.GetUpdateStackWithTrues()))
+	r.PushUpdate(newProposal.Spec.Federation, update)
+	log.Info(fmt.Sprintf("Proposal Status update triggering reconcile on Federation custom resource %s: update [ %+v ]", newProposal.Spec.Federation, update.GetUpdateStackWithTrues()))
 	return true
+}
+
+func (r *ReconcileFederation) DeleteFunc(e event.DeleteEvent) bool {
+	var reconcile bool
+	switch e.Object.(type) {
+	case *current.Network:
+		network := e.Object.(*current.Network)
+		log.Info(fmt.Sprintf("Delete event detected for network '%s'", network.GetNamespacedName()))
+		reconcile = r.PredictNetworkDelete(network)
+	}
+	return reconcile
+}
+
+func (r *ReconcileFederation) PredictNetworkDelete(network *current.Network) bool {
+	fedns := network.Spec.Federation
+	netns := network.NamespacedName()
+	err := r.DeleteNetwork(fedns, netns)
+	if err != nil {
+		log.Error(err, fmt.Sprintf("Network %s in Federation %s", netns.String(), fedns))
+	}
+	return false
+}
+
+func (r *ReconcileFederation) DeleteNetwork(fedns string, netns current.NamespacedName) error {
+	var err error
+	federation := &current.Federation{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{
+		Name: fedns,
+	}, federation)
+	if err != nil {
+		return err
+	}
+
+	exist := federation.Status.DeleteNetwork(current.NamespacedName{
+		Name:      netns.Name,
+		Namespace: netns.Namespace,
+	})
+
+	// network do not exist in this federation ,do not need to PatchStatus
+	if !exist {
+		return errors.Errorf("network %s not exist in federation %s", netns.String(), fedns)
+	}
+
+	err = r.client.PatchStatus(context.TODO(), federation, nil, k8sclient.PatchOption{
+		Resilient: &k8sclient.ResilientPatch{
+			Retry:    2,
+			Into:     &current.Federation{},
+			Strategy: client.MergeFrom,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

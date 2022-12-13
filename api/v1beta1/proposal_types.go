@@ -57,7 +57,7 @@ const (
 // +k8s:deepcopy-gen=true
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:resource:scope=Cluster,shortName=pro
 type Proposal struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -77,7 +77,7 @@ type ProposalList struct {
 }
 
 type ProposalSpec struct {
-	Federation     NamespacedName `json:"federation"`
+	Federation     string         `json:"federation"`
 	Policy         Policy         `json:"policy"`
 	Initiator      NamespacedName `json:"initiator"`
 	ProposalSource `json:",inline"`

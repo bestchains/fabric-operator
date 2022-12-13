@@ -36,7 +36,7 @@ func (network *Network) GetMembers() []Member {
 }
 
 func (network *Network) HasFederation() bool {
-	return network.Spec.Federation.Name != ""
+	return network.Spec.Federation != ""
 }
 
 func (network *Network) HasConsensus() bool {

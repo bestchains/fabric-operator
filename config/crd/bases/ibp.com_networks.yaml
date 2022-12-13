@@ -45,12 +45,7 @@ spec:
                 type: object
               federation:
                 description: Federation which this network belongs to
-                properties:
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                type: object
+                type: string
               license:
                 description: License should be accepted by the user to be able to
                   setup console

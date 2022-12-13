@@ -12,8 +12,10 @@ spec:
     kind: Federation
     listKind: FederationList
     plural: federations
+    shortNames:
+    - fed
     singular: federation
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v1beta1
     schema:

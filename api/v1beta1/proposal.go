@@ -32,7 +32,7 @@ func (p *Proposal) GetVoteLabel() map[string]string {
 
 func (p *Proposal) GetCandidateOrganizations(ctx context.Context, client k8sclient.Client) ([]NamespacedName, error) {
 	federation := &Federation{}
-	if err := client.Get(ctx, types.NamespacedName{Name: p.Spec.Federation.Name, Namespace: p.Spec.Federation.Namespace}, federation); err != nil {
+	if err := client.Get(ctx, types.NamespacedName{Name: p.Spec.Federation}, federation); err != nil {
 		return nil, err
 	}
 	orgs := make([]NamespacedName, 0)

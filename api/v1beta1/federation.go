@@ -23,10 +23,6 @@ func (federation *Federation) GetLabels() map[string]string {
 	}
 }
 
-func (federation *Federation) GetNamespacedName() string {
-	return federation.GetNamespace() + "-" + federation.GetName()
-}
-
 func (federation *Federation) NamespacedName() NamespacedName {
 	return NamespacedName{Name: federation.Name, Namespace: federation.Namespace}
 }

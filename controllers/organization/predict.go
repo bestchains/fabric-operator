@@ -47,7 +47,7 @@ func (r *ReconcileOrganization) CreateFunc(e event.CreateEvent) bool {
 
 	case *current.Federation:
 		federation := e.Object.(*current.Federation)
-		log.Info(fmt.Sprintf("Create event detected for federation '%s'", federation.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Create event detected for federation '%s'", federation.GetName()))
 		reconcile = r.PredictFederationCreate(federation)
 	}
 	return reconcile
@@ -96,7 +96,7 @@ func (r *ReconcileOrganization) PredictFederationCreate(federation *current.Fede
 	for _, m := range federation.Spec.Members {
 		err = r.AddFed(m, federation)
 		if err != nil {
-			log.Error(err, fmt.Sprintf("Member %s in Federation %s", m.GetNamespacedName(), federation.GetNamespacedName()))
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", m.GetNamespacedName(), federation.GetName()))
 		}
 	}
 
@@ -117,7 +117,7 @@ func (r *ReconcileOrganization) UpdateFunc(e event.UpdateEvent) bool {
 	case *current.Federation:
 		oldFed := e.ObjectOld.(*current.Federation)
 		newFed := e.ObjectNew.(*current.Federation)
-		log.Info(fmt.Sprintf("Update event detected for fedeartion '%s'", oldFed.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Update event detected for fedeartion '%s'", oldFed.GetName()))
 
 		reconcile = r.PredictFederationUpdate(oldFed, newFed)
 
@@ -154,14 +154,14 @@ func (r *ReconcileOrganization) PredictFederationUpdate(oldFed *current.Federati
 	for _, am := range added {
 		err = r.AddFed(am, newFed)
 		if err != nil {
-			log.Error(err, fmt.Sprintf("Member %s in Federation %s", am.GetNamespacedName(), newFed.GetNamespacedName()))
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", am.GetNamespacedName(), newFed.GetName()))
 		}
 	}
 
 	for _, rm := range removed {
 		err = r.DeleteFed(rm, newFed)
 		if err != nil {
-			log.Error(err, fmt.Sprintf("Member %s in Federation %s", rm.GetNamespacedName(), newFed.GetNamespacedName()))
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", rm.GetNamespacedName(), newFed.GetName()))
 		}
 	}
 
@@ -173,7 +173,7 @@ func (r *ReconcileOrganization) DeleteFunc(e event.DeleteEvent) bool {
 	switch e.Object.(type) {
 	case *current.Federation:
 		federation := e.Object.(*current.Federation)
-		log.Info(fmt.Sprintf("Delete event detected for federation '%s'", federation.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Delete event detected for federation '%s'", federation.GetName()))
 		reconcile = r.PredictFederationDelete(federation)
 	}
 	return reconcile
@@ -185,7 +185,7 @@ func (r *ReconcileOrganization) PredictFederationDelete(federation *current.Fede
 	for _, m := range federation.Spec.Members {
 		err = r.DeleteFed(m, federation)
 		if err != nil {
-			log.Error(err, fmt.Sprintf("Member %s in Federation %s", m.GetNamespacedName(), federation.GetNamespacedName()))
+			log.Error(err, fmt.Sprintf("Member %s in Federation %s", m.GetNamespacedName(), federation.GetName()))
 		}
 	}
 
@@ -209,7 +209,7 @@ func (r *ReconcileOrganization) AddFed(m current.Member, federation *current.Fed
 	})
 	// conflict detected,do not need to PatchStatus
 	if conflict {
-		return errors.Errorf("federation %s already exist in organization %s", federation.GetNamespacedName(), m.GetNamespacedName())
+		return errors.Errorf("federation %s already exist in organization %s", federation.GetName(), m.GetNamespacedName())
 	}
 
 	err = r.client.PatchStatus(context.TODO(), organization, nil, k8sclient.PatchOption{
@@ -245,7 +245,7 @@ func (r *ReconcileOrganization) DeleteFed(m current.Member, federation *current.
 
 	// federation do not exist in this organization ,do not need to PatchStatus
 	if !exist {
-		return errors.Errorf("federation %s not exist in organization %s", federation.GetNamespacedName(), m.GetNamespacedName())
+		return errors.Errorf("federation %s not exist in organization %s", federation.GetName(), m.GetNamespacedName())
 	}
 
 	err = r.client.PatchStatus(context.TODO(), organization, nil, k8sclient.PatchOption{

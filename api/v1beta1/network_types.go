@@ -30,7 +30,7 @@ type NetworkSpec struct {
 
 	// Federation which this network belongs to
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
-	Federation NamespacedName `json:"federation,omitempty"`
+	Federation string `json:"federation,omitempty"`
 
 	// Members which this network contains
 	// (DO NOT EDIT)Cloned automatically from Fderation.Spec.Members

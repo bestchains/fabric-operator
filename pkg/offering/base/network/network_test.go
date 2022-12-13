@@ -75,7 +75,7 @@ var _ = Describe("BaseNetwork Reconcile Logic", func() {
 				},
 				Spec: current.NetworkSpec{
 					Consensus:  current.NamespacedName{Name: "ibp-orderer", Namespace: "org1"},
-					Federation: current.NamespacedName{Name: "federation-sample", Namespace: "org1"},
+					Federation: "federation-sample",
 					Members: []current.Member{
 						{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: false},
 						{NamespacedName: current.NamespacedName{Name: "org3", Namespace: "org3"}, Initiator: false},
@@ -89,7 +89,7 @@ var _ = Describe("BaseNetwork Reconcile Logic", func() {
 			Expect(err.Error()).To(ContainSubstring("consensus is empty"))
 		})
 		It("failed due to missing federation", func() {
-			instance.Spec.Federation = current.NamespacedName{}
+			instance.Spec.Federation = ""
 			err = reconciler.PreReconcileChecks(instance, update)
 			Expect(err.Error()).To(ContainSubstring("federation is empty"))
 		})

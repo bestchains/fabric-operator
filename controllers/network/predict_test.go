@@ -70,7 +70,7 @@ var _ = Describe("Predict on Network", func() {
 				Namespace: "org1",
 			},
 			Spec: current.NetworkSpec{
-				Federation: federation.NamespacedName(),
+				Federation: federation.GetName(),
 				Members: []current.Member{
 					{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
 					{NamespacedName: current.NamespacedName{Name: "org2", Namespace: "org2"}, Initiator: false},
@@ -87,7 +87,7 @@ var _ = Describe("Predict on Network", func() {
 				Namespace: "org1",
 			},
 			Spec: current.NetworkSpec{
-				Federation: federation.NamespacedName(),
+				Federation: federation.GetName(),
 				Members: []current.Member{
 					{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
 				},

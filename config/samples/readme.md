@@ -93,7 +93,7 @@ status:
 
 某个组织要想创建一个联盟 (Federation)，需要按以下步骤：
 
-1. 在自己的 ns 中创建一个联盟 (Federation) 资源。
+1. 创建一个联盟 (Federation) 资源。
 2. 创建一个提案（Proposal），类型为创建联盟（createFederation），这会触发在每个可以投票的组织中自动创建 选票（vote）资源。
 3. 等待每个可以投票的组织手动修改选票（Vote），即投票，表明自己的意愿，同意或者拒绝。
 4. 投票符合提案（Proposal）中规定的策略（spec.Policy）后，成功创建联盟。

@@ -149,13 +149,13 @@ func (network *BaseNetwork) PreReconcileChecks(instance *current.Network, update
 	}
 
 	if federation.Status.Type != current.FederationActivated {
-		return errors.Errorf("the dependent federation %s is not activated yet", federation.GetNamespacedName())
+		return errors.Errorf("the dependent federation %s is not activated yet", federation.GetName())
 	}
 
 	// Network only can contain members inherited from Federation
 	added, _ := current.DifferMembers(federation.GetMembers(), instance.GetMembers())
 	if len(added) != 0 {
-		return errors.Errorf("network %s contains members %v which not in Federation %s", instance.GetNamespacedName(), added, federation.GetNamespacedName())
+		return errors.Errorf("network %s contains members %v which not in Federation %s", instance.GetNamespacedName(), added, federation.GetName())
 	}
 
 	return nil
@@ -202,7 +202,7 @@ func (network *BaseNetwork) GetLabels(instance v1.Object) map[string]string {
 func (network *BaseNetwork) GetFederation(instance *current.Network) (*current.Federation, error) {
 	federation := &current.Federation{}
 
-	err := network.Client.Get(context.TODO(), types.NamespacedName{Name: instance.Spec.Federation.Name, Namespace: instance.Spec.Federation.Namespace}, federation)
+	err := network.Client.Get(context.TODO(), types.NamespacedName{Name: instance.Spec.Federation}, federation)
 	if err != nil {
 		return nil, err
 	}

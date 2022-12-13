@@ -114,17 +114,41 @@ func add(mgr manager.Manager, r *ReconcileFederation) error {
 	}
 
 	// Watch for changes to Network
-	err = c.Watch(&source.Kind{Type: &current.Network{}}, &handler.EnqueueRequestForObject{}, predicateFuncs)
+	err = c.Watch(&source.Kind{Type: &current.Network{}}, handler.EnqueueRequestsFromMapFunc(network2federationMap), predicateFuncs)
 	if err != nil {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &current.Proposal{}}, &handler.EnqueueRequestForObject{}, predicateFuncs)
+	err = c.Watch(&source.Kind{Type: &current.Proposal{}}, handler.EnqueueRequestsFromMapFunc(proposal2federationMap), predicateFuncs)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func proposal2federationMap(object client.Object) []reconcile.Request {
+	proposal := object.(*current.Proposal)
+	return []reconcile.Request{
+		{
+			NamespacedName: types.NamespacedName{
+				Namespace: proposal.Namespace,
+				Name:      proposal.Spec.Federation,
+			},
+		},
+	}
+}
+
+func network2federationMap(object client.Object) []reconcile.Request {
+	network := object.(*current.Network)
+	return []reconcile.Request{
+		{
+			NamespacedName: types.NamespacedName{
+				Namespace: network.Namespace,
+				Name:      network.Spec.Federation,
+			},
+		},
+	}
 }
 
 var _ reconcile.Reconciler = &ReconcileFederation{}
@@ -170,20 +194,6 @@ func (r *ReconcileFederation) Reconcile(ctx context.Context, request reconcile.R
 	var err error
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 
-	if request.Namespace == "" {
-		// todo should add a flag
-		// this is proposal status update trigger federation reconcile
-		proposal := &current.Proposal{}
-		err = r.client.Get(context.TODO(), request.NamespacedName, proposal)
-		if err != nil {
-			if k8serrors.IsNotFound(err) {
-				return reconcile.Result{}, nil
-			}
-			return reconcile.Result{}, err
-		}
-		request.Namespace = proposal.Spec.Federation.Namespace
-		request.Name = proposal.Spec.Federation.Name
-	}
 	reqLogger.Info("Reconciling Federation")
 
 	instance := &current.Federation{}
@@ -200,14 +210,14 @@ func (r *ReconcileFederation) Reconcile(ctx context.Context, request reconcile.R
 	}
 
 	update := r.GetUpdateStatus(instance)
-	reqLogger.Info(fmt.Sprintf("Reconciling Federation '%s' with update values of [ %+v ]", instance.GetNamespacedName(), update.GetUpdateStackWithTrues()))
+	reqLogger.Info(fmt.Sprintf("Reconciling Federation '%s' with update values of [ %+v ]", instance.GetName(), update.GetUpdateStackWithTrues()))
 
-	result, err := r.Offering.Reconcile(instance, r.PopUpdate(instance.GetNamespacedName()))
+	result, err := r.Offering.Reconcile(instance, r.PopUpdate(instance.GetName()))
 	if err != nil {
 		if setStatuErr := r.SetErrorStatus(instance, err); setStatuErr != nil {
 			return reconcile.Result{}, operatorerrors.IsBreakingError(setStatuErr, "failed to update status", log)
 		}
-		return reconcile.Result{}, operatorerrors.IsBreakingError(errors.Wrapf(err, "Federation instance '%s' encountered error", instance.GetNamespacedName()), "stopping reconcile loop", log)
+		return reconcile.Result{}, operatorerrors.IsBreakingError(errors.Wrapf(err, "Federation instance '%s' encountered error", instance.GetName()), "stopping reconcile loop", log)
 	} else {
 		setStatusErr := r.SetStatus(instance, result.Status)
 		if setStatusErr != nil {
@@ -216,16 +226,16 @@ func (r *ReconcileFederation) Reconcile(ctx context.Context, request reconcile.R
 	}
 
 	if result.Requeue {
-		r.PushUpdate(instance.GetNamespacedName(), *update)
+		r.PushUpdate(instance.GetName(), *update)
 	}
 
-	reqLogger.Info(fmt.Sprintf("Finished reconciling Federation '%s' with update values of [ %+v ]", instance.GetNamespacedName(), update.GetUpdateStackWithTrues()))
+	reqLogger.Info(fmt.Sprintf("Finished reconciling Federation '%s' with update values of [ %+v ]", instance.GetName(), update.GetUpdateStackWithTrues()))
 
 	// If the stack still has items that require processing, keep reconciling
 	// until the stack has been cleared
-	_, found := r.update[instance.GetNamespacedName()]
+	_, found := r.update[instance.GetName()]
 	if found {
-		if len(r.update[instance.GetNamespacedName()]) > 0 {
+		if len(r.update[instance.GetName()]) > 0 {
 			return reconcile.Result{
 				Requeue: true,
 			}, nil
@@ -239,7 +249,7 @@ func (r *ReconcileFederation) Reconcile(ctx context.Context, request reconcile.R
 func (r *ReconcileFederation) SetStatus(instance *current.Federation, reconcileStatus *current.CRStatus) error {
 	var err error
 
-	log.Info(fmt.Sprintf("Setting status for '%s'", instance.GetNamespacedName()))
+	log.Info(fmt.Sprintf("Setting status for '%s'", instance.GetName()))
 
 	if err = r.client.Get(context.TODO(), types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}, instance); err != nil {
 		return err
@@ -291,7 +301,7 @@ func (r *ReconcileFederation) SetErrorStatus(instance *current.Federation, recon
 		return errors.Wrap(err, "failed to save spec state")
 	}
 
-	log.Info(fmt.Sprintf("Setting error status for '%s'", instance.GetNamespacedName()))
+	log.Info(fmt.Sprintf("Setting error status for '%s'", instance.GetName()))
 
 	status := instance.Status.CRStatus
 	status.Type = current.Error
@@ -329,7 +339,7 @@ func (r *ReconcileFederation) SaveSpecState(instance *current.Federation) error 
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-spec", instance.GetName()),
-			Namespace: instance.GetNamespace(),
+			Namespace: metav1.NamespaceSystem,
 			Labels:    instance.GetLabels(),
 		},
 		BinaryData: map[string][]byte{
@@ -352,7 +362,7 @@ func (r *ReconcileFederation) GetSpecState(instance *current.Federation) (*corev
 	cm := &corev1.ConfigMap{}
 	nn := types.NamespacedName{
 		Name:      fmt.Sprintf("%s-spec", instance.GetName()),
-		Namespace: instance.GetNamespace(),
+		Namespace: metav1.NamespaceSystem,
 	}
 
 	err := r.client.Get(context.TODO(), nn, cm)

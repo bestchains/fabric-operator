@@ -5,9 +5,7 @@ metadata:
 spec:
   license:
     accept: true
-  federation:
-    name: federation-sample
-    namespace: org1
+  federation: federation-sample
   consensus:
     name: org0-consensus
   members:

@@ -4,9 +4,7 @@ kind: Proposal
 metadata:
   name: delete-member-federation-sample
 spec:
-  federation:
-    namespace: org1
-    name: federation-sample
+  federation: federation-sample
   policy: All
   initiator:
     namespace: org1

@@ -155,21 +155,37 @@ rules:
       - ibporderers.ibp.com
       - ibpconsoles.ibp.com
       - organizations.ibp.com
+      - federations.ibp.com
+      - networks.ibp.com
+      - proposals.ibp.com
+      - votes.ibp.com
       - ibpcas
       - ibppeers
       - ibporderers
       - ibpconsoles
       - organizations
+      - federations
+      - networks
+      - proposals
+      - votes
       - ibpcas/finalizers
       - ibppeers/finalizers
       - ibporderers/finalizers
       - ibpconsoles/finalizers
       - organizations/finalizers
+      - federations/finalizers
+      - networks/finalizers
+      - proposals/finalizers
+      - votes/finalizers
       - ibpcas/status
       - ibppeers/status
       - ibporderers/status
       - ibpconsoles/status
       - organizations/status
+      - federations/status
+      - networks/status
+      - proposals/status
+      - votes/status
     verbs:
       - get
       - list

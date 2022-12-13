@@ -259,7 +259,7 @@ var _ = Describe("Predict federation events", func() {
 					Namespace: "org1",
 				},
 				Spec: current.NetworkSpec{
-					Federation: federation.NamespacedName(),
+					Federation: federation.GetName(),
 					Members:    federation.GetMembers(),
 					Consensus:  current.NamespacedName{Name: "ibporderer-sample", Namespace: "org1"},
 				},
@@ -272,7 +272,7 @@ var _ = Describe("Predict federation events", func() {
 					"org0",
 				)
 			}
-			err = reconciler.AddNetwork(federation.NamespacedName(), network.NamespacedName())
+			err = reconciler.AddNetwork(federation.GetName(), network.NamespacedName())
 
 			Expect(k8serrors.IsNotFound(err)).To(BeTrue())
 		})
@@ -289,7 +289,7 @@ var _ = Describe("Predict federation events", func() {
 				}
 				return nil
 			}
-			err = reconciler.AddNetwork(federation.NamespacedName(), network.NamespacedName())
+			err = reconciler.AddNetwork(federation.GetName(), network.NamespacedName())
 
 			Expect(err.Error()).To(ContainSubstring("already exist"))
 		})
@@ -306,7 +306,7 @@ var _ = Describe("Predict federation events", func() {
 			}
 			errMsg := "patch status failed"
 			client.PatchStatusReturns(errors.New(errMsg))
-			err = reconciler.AddNetwork(federation.NamespacedName(), network.NamespacedName())
+			err = reconciler.AddNetwork(federation.GetName(), network.NamespacedName())
 
 			Expect(err.Error()).To(Equal(errMsg))
 		})
@@ -318,7 +318,7 @@ var _ = Describe("Predict federation events", func() {
 					"org0",
 				)
 			}
-			err = reconciler.DeleteNetwork(federation.NamespacedName(), network.NamespacedName())
+			err = reconciler.DeleteNetwork(federation.GetName(), network.NamespacedName())
 
 			Expect(k8serrors.IsNotFound(err)).To(BeTrue())
 		})
@@ -334,7 +334,7 @@ var _ = Describe("Predict federation events", func() {
 				}
 				return nil
 			}
-			err = reconciler.DeleteNetwork(federation.NamespacedName(), network.NamespacedName())
+			err = reconciler.DeleteNetwork(federation.GetName(), network.NamespacedName())
 
 			Expect(err.Error()).To(ContainSubstring("not exist"))
 		})
@@ -352,7 +352,7 @@ var _ = Describe("Predict federation events", func() {
 			}
 			errMsg := "patch status failed"
 			client.PatchStatusReturns(errors.New(errMsg))
-			err = reconciler.DeleteNetwork(federation.NamespacedName(), network.NamespacedName())
+			err = reconciler.DeleteNetwork(federation.GetName(), network.NamespacedName())
 
 			Expect(err.Error()).To(Equal(errMsg))
 		})

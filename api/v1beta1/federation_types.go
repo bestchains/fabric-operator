@@ -59,9 +59,9 @@ type FederationStatus struct {
 	Networks []NamespacedName `json:"networks,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Cluster,shortName=fed
 // Federation is the Schema for the federations API
 type Federation struct {
 	metav1.TypeMeta   `json:",inline"`

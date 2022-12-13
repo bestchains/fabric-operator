@@ -12,6 +12,8 @@ spec:
     kind: Proposal
     listKind: ProposalList
     plural: proposals
+    shortNames:
+    - pro
     singular: proposal
   scope: Cluster
   versions:
@@ -71,12 +73,7 @@ spec:
                 format: date-time
                 type: string
               federation:
-                properties:
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                type: object
+                type: string
               initiator:
                 properties:
                   name:

@@ -68,7 +68,7 @@ var _ = Describe("Base network Overrides", func() {
 				Namespace: "org1",
 			},
 			Spec: current.NetworkSpec{
-				Federation: current.NamespacedName{Name: "federation-sample"},
+				Federation: "federation-sample",
 				Members: []current.Member{
 					{NamespacedName: current.NamespacedName{Name: "org1", Namespace: "org1"}, Initiator: true},
 					{NamespacedName: current.NamespacedName{Name: "org2", Namespace: "org2"}, Initiator: false},
