@@ -8,6 +8,7 @@ spec:
     accept: true
   configoverride:
     ca:
+      organization: org0
       iam:
         enabled: false
         url: "http://localhost:333" # To be replaced
@@ -16,6 +17,7 @@ spec:
         default:
           expiry: 87600h0m0s
     tlsca:
+      organization: org0
       iam:
         enabled: false
         url: "http://localhost:333" # To be replaced
@@ -25,7 +27,7 @@ spec:
           expiry: 87600h0m0s
   images:
     caImage: "hyperledgerk8s/fabric-ca"
-    caTag: "iam"
+    caTag: "1.5.5"
     caInitImage: "hyperledgerk8s/ubi-minimal"
     caInitTag: latest
   license:

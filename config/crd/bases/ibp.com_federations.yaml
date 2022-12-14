@@ -14,6 +14,7 @@ spec:
     plural: federations
     shortNames:
     - fed
+    - feds
     singular: federation
   scope: Cluster
   versions:

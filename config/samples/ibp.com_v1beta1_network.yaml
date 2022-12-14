@@ -10,7 +10,5 @@ spec:
     name: org0-consensus
   members:
     - name: org1
-      namespace: org1
       initiator: true # set by webhook
     - name: org2
-      namespace: org2

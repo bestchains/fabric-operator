@@ -57,7 +57,7 @@ const (
 // +k8s:deepcopy-gen=true
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Cluster,shortName=pro
+// +kubebuilder:resource:scope=Cluster,shortName=pro;pros
 type Proposal struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

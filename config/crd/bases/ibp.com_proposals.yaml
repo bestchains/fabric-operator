@@ -14,6 +14,7 @@ spec:
     plural: proposals
     shortNames:
     - pro
+    - pros
     singular: proposal
   scope: Cluster
   versions:

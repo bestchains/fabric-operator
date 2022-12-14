@@ -18,12 +18,16 @@ $ kubectl kustomize config/crd | kubectl apply -f -
 
 ## 组织和联盟管理
 
-### 1. 创建 3 个组织
+### 1. 创建3个User
 
 ```bash
-kubectl kustomize config/samples/stack/org1 | kubectl apply -f -
-kubectl kustomize config/samples/stack/org2 | kubectl apply -f -
-kubectl kustomize config/samples/stack/org3 | kubectl apply -f -
+kubectl apply -f config/samples/users
+```
+
+### 2. 创建 3 个组织(对应3个User)
+
+```bash
+kubectl apply -f config/samples/orgs
 ```
 
 每个组织在 kubernetes 中对应一个 ns。

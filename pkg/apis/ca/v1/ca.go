@@ -82,6 +82,7 @@ type NameVal struct {
 }
 
 type CAConfig struct {
+	Organization string                 `json:"organization,omitempty"`
 	Version      string                 `json:"version,omitempty"`
 	Cfg          CfgOptions             `json:"cfg,omitempty"`
 	CA           CAInfo                 `json:"ca,omitempty"`

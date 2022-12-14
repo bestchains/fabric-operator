@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"time"
 
 	iam "github.com/IBM-Blockchain/fabric-operator/api/iam/v1alpha1"
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
@@ -29,6 +30,8 @@ import (
 	"github.com/go-test/deep"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
+	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -49,6 +52,8 @@ func (r *ReconcileOrganization) CreateFunc(e event.CreateEvent) bool {
 		federation := e.Object.(*current.Federation)
 		log.Info(fmt.Sprintf("Create event detected for federation '%s'", federation.GetName()))
 		reconcile = r.PredictFederationCreate(federation)
+	case *current.IBPCA:
+		reconcile = false
 	}
 	return reconcile
 }
@@ -120,7 +125,12 @@ func (r *ReconcileOrganization) UpdateFunc(e event.UpdateEvent) bool {
 		log.Info(fmt.Sprintf("Update event detected for fedeartion '%s'", oldFed.GetName()))
 
 		reconcile = r.PredictFederationUpdate(oldFed, newFed)
+	case *current.IBPCA:
+		oldCA := e.ObjectOld.(*current.IBPCA)
+		newCA := e.ObjectNew.(*current.IBPCA)
+		log.Info(fmt.Sprintf("Update event detected for ibpca '%s'", oldCA.GetName()))
 
+		reconcile = r.PredictCAUpdate(oldCA, newCA)
 	}
 	return reconcile
 }
@@ -180,6 +190,16 @@ func (r *ReconcileOrganization) PredictFederationUpdate(oldFed *current.Federati
 	return false
 }
 
+func (r *ReconcileOrganization) PredictCAUpdate(oldCA *current.IBPCA, newCA *current.IBPCA) bool {
+	if newCA.Status.CRStatus.Type == current.Deployed {
+		organization := newCA.GetOrganization()
+		err := r.SetStatusToDeployed(organization)
+		if err != nil {
+			log.Error(err, fmt.Sprintf("set organization %s to `Deployed`", organization.Name))
+		}
+	}
+	return false
+}
 func (r *ReconcileOrganization) DeleteFunc(e event.DeleteEvent) bool {
 	var reconcile bool
 	switch e.Object.(type) {
@@ -196,6 +216,7 @@ func (r *ReconcileOrganization) DeleteFunc(e event.DeleteEvent) bool {
 }
 
 func (r *ReconcileOrganization) PredictOrganizationDelete(organization *current.Organization) bool {
+	var err error
 	if r.Config.OrganizationInitConfig.IAMEnabled {
 		userList, err := r.GetIAMUsers(organization.GetName())
 		if err != nil {
@@ -209,7 +230,16 @@ func (r *ReconcileOrganization) PredictOrganizationDelete(organization *current.
 			}
 		}
 	}
-
+	// delete namespace
+	ns := &corev1.Namespace{
+		ObjectMeta: v1.ObjectMeta{
+			Name: organization.GetUserNamespace(),
+		},
+	}
+	err = r.client.Delete(context.TODO(), ns, &client.DeleteOptions{})
+	if err != nil {
+		log.Error(err, fmt.Sprintf("failed to delete namespace for organiation %s", organization.GetName()))
+	}
 	return false
 }
 
@@ -256,6 +286,35 @@ func (r *ReconcileOrganization) AddFed(m current.Member, federation *current.Fed
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (r *ReconcileOrganization) SetStatusToDeployed(organization current.NamespacedName) error {
+	var err error
+	org := &current.Organization{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: organization.Name}, org)
+	if err != nil {
+		return err
+	}
+
+	status := org.Status.CRStatus
+	status.Type = current.Deployed
+	status.Status = current.True
+	status.Reason = "IBPCA Deployed"
+	status.LastHeartbeatTime = time.Now().String()
+
+	org.Status = current.OrganizationStatus{
+		CRStatus: status,
+	}
+
+	err = r.client.PatchStatus(context.TODO(), org, nil, k8sclient.PatchOption{
+		Resilient: &k8sclient.ResilientPatch{
+			Retry:    2,
+			Into:     &current.Organization{},
+			Strategy: client.MergeFrom,
+		},
+	})
 
 	return nil
 }

@@ -60,12 +60,12 @@ func (m *Manager) Reconcile(instance v1.Object, update bool) error {
 		if k8serrors.IsNotFound(err) {
 			log.Info(fmt.Sprintf("Creating CA '%s'", name))
 
-			clusterRole, err := m.GetCABasedOnCRFromFile(instance)
+			ibpca, err := m.GetCABasedOnCRFromFile(instance)
 			if err != nil {
 				return err
 			}
 
-			err = m.Client.Create(context.TODO(), clusterRole, k8sclient.CreateOption{Owner: instance, Scheme: m.Scheme})
+			err = m.Client.Create(context.TODO(), ibpca, k8sclient.CreateOption{Owner: instance, Scheme: m.Scheme})
 			if err != nil {
 				return err
 			}

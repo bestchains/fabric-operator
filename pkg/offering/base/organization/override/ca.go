@@ -27,6 +27,9 @@ func (o *Override) CreateOrUpdateCA(instance *current.Organization, ca *current.
 	ca.Spec.Domain = o.IngressDomain
 
 	if o.IAMEnabled {
+		// CA Image
+		ca.Spec.Images.CATag = "iam"
+
 		// CA Override
 		var caOverride *config.Config
 		caOverride, err = GetCAConfigOverride(ca)
@@ -36,11 +39,13 @@ func (o *Override) CreateOrUpdateCA(instance *current.Organization, ca *current.
 		caOverride.ServerConfig.CAConfig.IAM.Enabled = &o.IAMEnabled
 		caOverride.ServerConfig.CAConfig.IAM.URL = o.IAMServer
 
-		raw, err := util.ConvertToRuntimeRaw(caOverride)
+		caOverride.ServerConfig.CAConfig.Organization = instance.GetName()
+
+		raw, err := util.ConvertToJsonMessage(caOverride.ServerConfig)
 		if err != nil {
 			return err
 		}
-		ca.Spec.ConfigOverride.CA = raw
+		ca.Spec.ConfigOverride.CA.Raw = *raw
 
 		// TLSCA Override
 		var tlscaOverride *config.Config
@@ -50,11 +55,14 @@ func (o *Override) CreateOrUpdateCA(instance *current.Organization, ca *current.
 		}
 		tlscaOverride.ServerConfig.CAConfig.IAM.Enabled = &o.IAMEnabled
 		tlscaOverride.ServerConfig.CAConfig.IAM.URL = o.IAMServer
-		raw, err = util.ConvertToRuntimeRaw(tlscaOverride)
+
+		tlscaOverride.ServerConfig.CAConfig.Organization = instance.GetName()
+
+		raw, err = util.ConvertToJsonMessage(tlscaOverride.ServerConfig)
 		if err != nil {
 			return err
 		}
-		ca.Spec.ConfigOverride.TLSCA = raw
+		ca.Spec.ConfigOverride.TLSCA.Raw = *raw
 	}
 
 	ca.OwnerReferences = []v1.OwnerReference{

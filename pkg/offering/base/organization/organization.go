@@ -222,7 +222,7 @@ func (organization *BaseOrganization) ReconcileManagers(instance *current.Organi
 func (organization *BaseOrganization) CheckStates(instance *current.Organization) (common.Result, error) {
 	return common.Result{
 		Status: &current.CRStatus{
-			Type:    current.Created,
+			Type:    current.Deploying,
 			Version: version.Operator,
 		},
 	}, nil

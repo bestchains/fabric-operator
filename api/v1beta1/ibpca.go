@@ -116,6 +116,10 @@ func (s *IBPCA) GetArch() []string {
 	return s.Spec.Arch
 }
 
+func (s *IBPCA) GetOrganization() NamespacedName {
+	return NamespacedName{Namespace: s.GetNamespace(), Name: s.GetName()}
+}
+
 func (s *IBPCA) GetLabels() map[string]string {
 	label := os.Getenv("OPERATOR_LABEL_PREFIX")
 	if label == "" {
