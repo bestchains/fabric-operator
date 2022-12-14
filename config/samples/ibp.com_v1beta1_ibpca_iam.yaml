@@ -19,29 +19,31 @@
 apiVersion: ibp.com/v1beta1
 kind: IBPCA
 metadata:
-  name: org-ca
+  name: org1-ca
 spec:
   action:
     renew: {}
   configoverride:
     ca:
+      organization: "org1"
       iam:
         enabled: true
         url: "http://localhost:333"
       registry:
         identities:
-          - name: orgadmin
-            pass: orgadminpw
+          - name: org1admin
+            pass: org1adminpw
             type: admin
       debug: true
       signing:
         default:
           expiry: 87600h0m0s
     tlsca:
+      organization: "org1"
       registry:
         identities:
-          - name: orgadmin
-            pass: orgadminpw
+          - name: org1admin
+            pass: org1adminpw
             type: admin
       debug: true
       signing:

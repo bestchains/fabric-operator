@@ -34,11 +34,11 @@ func (organization *Organization) GetCA() NamespacedName {
 }
 
 func (organization *Organization) GetAdminRole() string {
-	return organization.GetUserNamespace() + "blockchain:admin-role"
+	return "blockchain:admin-role"
 }
 
 func (organization *Organization) GetClientRole() string {
-	return organization.GetUserNamespace() + "blockchain:client-role"
+	return "blockchain:client-role"
 }
 
 func (organization *Organization) GetAdminClusterRole() string {
@@ -46,7 +46,7 @@ func (organization *Organization) GetAdminClusterRole() string {
 }
 
 func (organization *Organization) GetRoleBinding(role string) string {
-	return role + "-binding"
+	return organization.GetUserNamespace() + ":" + role + "-binding"
 }
 
 func (organization *Organization) GetAnnotationKey() string {

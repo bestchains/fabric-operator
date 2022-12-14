@@ -9,17 +9,43 @@ rules:
     - ibp.com
   resources:
     - organizations
-    - federations
-    - proposals
   verbs:
     - create
+    - delete
     - get
     - list
 - apiGroups:
     - ibp.com
   resources:
     - organizations/status
+  verbs:
+    - get
+# CRD Federations & Networks
+- apiGroups:
+    - ibp.com
+  resources:
+    - federations
+    - networks
+  verbs:
+    - create
+    - delete
+- apiGroups:
+    - ibp.com
+  resources:
     - federations/status
+    - networks/status
+  verbs:
+    - get
+# CRD Proposals
+- apiGroups:
+    - ibp.com
+  resources:
+    - proposals
+  verbs:
+    - create
+- apiGroups:
+    - ibp.com
+  resources:
     - proposals/status
   verbs:
     - get

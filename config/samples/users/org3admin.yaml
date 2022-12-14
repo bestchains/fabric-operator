@@ -1,12 +1,9 @@
 apiVersion: iam.tenxcloud.com/v1alpha1
 kind: User
 metadata:
-  generation: 4
   labels:
     t7d.io.username: org3admin
   name: org3admin
-  resourceVersion: "247737824"
-  uid: b9766700-95f6-440b-b126-532ad672a5de
 spec:
   description: org3admin 用户信息的描述
   email: org3admin@tenxcloud.com
@@ -21,3 +18,15 @@ spec:
   password: $2a$10$693K.zP98yCs1qVwEp//DuWYOtLIE1doihtGhcCyYh3IpgSdGGba2
   phone: "18890901212"
   role: admin
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: org3:blockchain:admin-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: blockchain:admin-cluster-role
+subjects:
+- kind: User
+  name: org3admin

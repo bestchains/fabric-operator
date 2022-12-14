@@ -12,6 +12,8 @@
 $ make kind
 # 部署CRD
 $ kubectl kustomize config/crd | kubectl apply -f -
+# 创建admin-cluster-role
+$ kubectl apply -f config/rbac/admin_cluster_role.yaml
 ```
 
 </detail>
