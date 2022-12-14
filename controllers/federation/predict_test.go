@@ -272,7 +272,7 @@ var _ = Describe("Predict federation events", func() {
 					"org0",
 				)
 			}
-			err = reconciler.AddNetwork(federation.GetName(), network.NamespacedName())
+			err = reconciler.AddNetwork(federation.GetName(), network.Name)
 
 			Expect(k8serrors.IsNotFound(err)).To(BeTrue())
 		})
@@ -284,12 +284,12 @@ var _ = Describe("Predict federation events", func() {
 					obj.ObjectMeta = federation.ObjectMeta
 					obj.Spec = federation.Spec
 
-					federation.Status.Networks = append(federation.Status.Networks, network.NamespacedName())
+					federation.Status.Networks = append(federation.Status.Networks, network.Name)
 					obj.Status = federation.Status
 				}
 				return nil
 			}
-			err = reconciler.AddNetwork(federation.GetName(), network.NamespacedName())
+			err = reconciler.AddNetwork(federation.GetName(), network.Name)
 
 			Expect(err.Error()).To(ContainSubstring("already exist"))
 		})
@@ -306,7 +306,7 @@ var _ = Describe("Predict federation events", func() {
 			}
 			errMsg := "patch status failed"
 			client.PatchStatusReturns(errors.New(errMsg))
-			err = reconciler.AddNetwork(federation.GetName(), network.NamespacedName())
+			err = reconciler.AddNetwork(federation.GetName(), network.Name)
 
 			Expect(err.Error()).To(Equal(errMsg))
 		})
@@ -318,7 +318,7 @@ var _ = Describe("Predict federation events", func() {
 					"org0",
 				)
 			}
-			err = reconciler.DeleteNetwork(federation.GetName(), network.NamespacedName())
+			err = reconciler.DeleteNetwork(federation.GetName(), network.Name)
 
 			Expect(k8serrors.IsNotFound(err)).To(BeTrue())
 		})
@@ -334,7 +334,7 @@ var _ = Describe("Predict federation events", func() {
 				}
 				return nil
 			}
-			err = reconciler.DeleteNetwork(federation.GetName(), network.NamespacedName())
+			err = reconciler.DeleteNetwork(federation.GetName(), network.Name)
 
 			Expect(err.Error()).To(ContainSubstring("not exist"))
 		})
@@ -346,13 +346,13 @@ var _ = Describe("Predict federation events", func() {
 					obj.ObjectMeta = federation.ObjectMeta
 					obj.Spec = federation.Spec
 					obj.Status = federation.Status
-					obj.Status.Networks = append(obj.Status.Networks, network.NamespacedName())
+					obj.Status.Networks = append(obj.Status.Networks, network.Name)
 				}
 				return nil
 			}
 			errMsg := "patch status failed"
 			client.PatchStatusReturns(errors.New(errMsg))
-			err = reconciler.DeleteNetwork(federation.GetName(), network.NamespacedName())
+			err = reconciler.DeleteNetwork(federation.GetName(), network.Name)
 
 			Expect(err.Error()).To(Equal(errMsg))
 		})

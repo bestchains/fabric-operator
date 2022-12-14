@@ -23,14 +23,6 @@ func (network *Network) GetLabels() map[string]string {
 	}
 }
 
-func (network *Network) GetNamespacedName() string {
-	return network.GetNamespace() + "-" + network.GetName()
-}
-
-func (network *Network) NamespacedName() NamespacedName {
-	return NamespacedName{Name: network.Name, Namespace: network.Namespace}
-}
-
 func (network *Network) GetMembers() []Member {
 	return network.Spec.Members
 }

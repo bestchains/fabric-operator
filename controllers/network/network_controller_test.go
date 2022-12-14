@@ -122,7 +122,7 @@ var _ = Describe("ReconcileFederation", func() {
 	Context("reconcile failed due to offdering.reconcile failed", func() {
 		BeforeEach(func() {
 			reconciler.update = map[string][]Update{
-				network.GetNamespacedName(): {
+				network.GetName(): {
 					{specUpdated: true, memberUpdated: true},
 				},
 			}
@@ -143,7 +143,7 @@ var _ = Describe("ReconcileFederation", func() {
 	Context("reconcile succ", func() {
 		BeforeEach(func() {
 			reconciler.update = map[string][]Update{
-				network.GetNamespacedName(): {
+				network.GetName(): {
 					{specUpdated: true, memberUpdated: true},
 				},
 			}
@@ -165,7 +165,7 @@ var _ = Describe("ReconcileFederation", func() {
 
 		It("set status succ.requeue due to another update exists", func() {
 			reconciler.update = map[string][]Update{
-				network.GetNamespacedName(): {
+				network.GetName(): {
 					{specUpdated: true, memberUpdated: true},
 					{specUpdated: true, memberUpdated: false},
 				},

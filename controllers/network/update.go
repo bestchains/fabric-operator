@@ -67,13 +67,13 @@ func (r *ReconcileNetwork) GetUpdateStatusAtElement(instance *current.Network, i
 	defer r.mutex.Unlock()
 
 	update := Update{}
-	_, ok := r.update[instance.GetNamespacedName()]
+	_, ok := r.update[instance.GetName()]
 	if !ok {
 		return &update
 	}
 
-	if len(r.update[instance.GetNamespacedName()]) >= 1 {
-		update = r.update[instance.GetNamespacedName()][index]
+	if len(r.update[instance.GetName()]) >= 1 {
+		update = r.update[instance.GetName()][index]
 	}
 
 	return &update

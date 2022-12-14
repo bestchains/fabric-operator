@@ -155,7 +155,7 @@ func (network *BaseNetwork) PreReconcileChecks(instance *current.Network, update
 	// Network only can contain members inherited from Federation
 	added, _ := current.DifferMembers(federation.GetMembers(), instance.GetMembers())
 	if len(added) != 0 {
-		return errors.Errorf("network %s contains members %v which not in Federation %s", instance.GetNamespacedName(), added, federation.GetName())
+		return errors.Errorf("network %s contains members %v which not in Federation %s", instance.GetName(), added, federation.GetName())
 	}
 
 	return nil

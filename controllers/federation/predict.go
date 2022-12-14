@@ -45,7 +45,7 @@ func (r *ReconcileFederation) CreateFunc(e event.CreateEvent) bool {
 
 	case *current.Network:
 		network := e.Object.(*current.Network)
-		log.Info(fmt.Sprintf("Create event detected for network '%s'", network.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Create event detected for network '%s'", network.GetName()))
 		reconcile = r.PredictNetworkCreate(network)
 	}
 
@@ -102,14 +102,14 @@ func (r *ReconcileFederation) PredictFederationCreate(federation *current.Federa
 }
 
 func (r *ReconcileFederation) PredictNetworkCreate(network *current.Network) bool {
-	err := r.AddNetwork(network.Spec.Federation, network.NamespacedName())
+	err := r.AddNetwork(network.Spec.Federation, network.Name)
 	if err != nil {
-		log.Error(err, fmt.Sprintf("Network %s in Federation %s", network.GetNamespacedName(), network.Spec.Federation))
+		log.Error(err, fmt.Sprintf("Network %s in Federation %s", network.GetName(), network.Spec.Federation))
 	}
 	return false
 }
 
-func (r *ReconcileFederation) AddNetwork(fedns string, netns current.NamespacedName) error {
+func (r *ReconcileFederation) AddNetwork(fedns, netns string) error {
 	var err error
 	federation := &current.Federation{}
 	err = r.client.Get(context.TODO(), types.NamespacedName{
@@ -119,13 +119,10 @@ func (r *ReconcileFederation) AddNetwork(fedns string, netns current.NamespacedN
 		return err
 	}
 
-	conflict := federation.Status.AddNetwork(current.NamespacedName{
-		Name:      netns.Name,
-		Namespace: netns.Namespace,
-	})
+	conflict := federation.Status.AddNetwork(netns)
 	// conflict detected,do not need to PatchStatus
 	if conflict {
-		return errors.Errorf("network %s already exist in federation %s", netns.String(), fedns)
+		return errors.Errorf("network %s already exist in federation %s", netns, fedns)
 	}
 
 	err = r.client.PatchStatus(context.TODO(), federation, nil, k8sclient.PatchOption{
@@ -182,62 +179,6 @@ func (r *ReconcileFederation) PredicFederationUpdate(oldFed *current.Federation,
 	log.Info(fmt.Sprintf("Spec update triggering reconcile on Federation custom resource %s: update [ %+v ]", oldFed.Name, update.GetUpdateStackWithTrues()))
 
 	return true
-}
-
-func (r *ReconcileFederation) DeleteFunc(e event.DeleteEvent) bool {
-	var reconcile bool
-	switch e.Object.(type) {
-	case *current.Network:
-		network := e.Object.(*current.Network)
-		log.Info(fmt.Sprintf("Delete event detected for network '%s'", network.GetNamespacedName()))
-		reconcile = r.PredictNetworkDelete(network)
-	}
-	return reconcile
-}
-
-func (r *ReconcileFederation) PredictNetworkDelete(network *current.Network) bool {
-	fedns := network.Spec.Federation
-	netns := network.NamespacedName()
-	err := r.DeleteNetwork(fedns, netns)
-	if err != nil {
-		log.Error(err, fmt.Sprintf("Network %s in Federation %s", netns.String(), fedns.String()))
-	}
-	return false
-}
-
-func (r *ReconcileFederation) DeleteNetwork(fedns current.NamespacedName, netns current.NamespacedName) error {
-	var err error
-	federation := &current.Federation{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{
-		Name:      fedns.Name,
-		Namespace: fedns.Namespace,
-	}, federation)
-	if err != nil {
-		return err
-	}
-
-	exist := federation.Status.DeleteNetwork(current.NamespacedName{
-		Name:      netns.Name,
-		Namespace: netns.Namespace,
-	})
-
-	// network do not exist in this federation ,do not need to PatchStatus
-	if !exist {
-		return errors.Errorf("network %s not exist in federation %s", netns.String(), fedns.String())
-	}
-
-	err = r.client.PatchStatus(context.TODO(), federation, nil, k8sclient.PatchOption{
-		Resilient: &k8sclient.ResilientPatch{
-			Retry:    2,
-			Into:     &current.Federation{},
-			Strategy: client.MergeFrom,
-		},
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r *ReconcileFederation) PredicProposalUpdate(oldProposal *current.Proposal, newProposal *current.Proposal) bool {
@@ -333,7 +274,7 @@ func (r *ReconcileFederation) DeleteFunc(e event.DeleteEvent) bool {
 	switch e.Object.(type) {
 	case *current.Network:
 		network := e.Object.(*current.Network)
-		log.Info(fmt.Sprintf("Delete event detected for network '%s'", network.GetNamespacedName()))
+		log.Info(fmt.Sprintf("Delete event detected for network '%s'", network.GetName()))
 		reconcile = r.PredictNetworkDelete(network)
 	}
 	return reconcile
@@ -341,15 +282,15 @@ func (r *ReconcileFederation) DeleteFunc(e event.DeleteEvent) bool {
 
 func (r *ReconcileFederation) PredictNetworkDelete(network *current.Network) bool {
 	fedns := network.Spec.Federation
-	netns := network.NamespacedName()
+	netns := network.Name
 	err := r.DeleteNetwork(fedns, netns)
 	if err != nil {
-		log.Error(err, fmt.Sprintf("Network %s in Federation %s", netns.String(), fedns))
+		log.Error(err, fmt.Sprintf("Network %s in Federation %s", netns, fedns))
 	}
 	return false
 }
 
-func (r *ReconcileFederation) DeleteNetwork(fedns string, netns current.NamespacedName) error {
+func (r *ReconcileFederation) DeleteNetwork(fedns, netns string) error {
 	var err error
 	federation := &current.Federation{}
 	err = r.client.Get(context.TODO(), types.NamespacedName{
@@ -359,14 +300,11 @@ func (r *ReconcileFederation) DeleteNetwork(fedns string, netns current.Namespac
 		return err
 	}
 
-	exist := federation.Status.DeleteNetwork(current.NamespacedName{
-		Name:      netns.Name,
-		Namespace: netns.Namespace,
-	})
+	exist := federation.Status.DeleteNetwork(netns)
 
 	// network do not exist in this federation ,do not need to PatchStatus
 	if !exist {
-		return errors.Errorf("network %s not exist in federation %s", netns.String(), fedns)
+		return errors.Errorf("network %s not exist in federation %s", netns, fedns)
 	}
 
 	err = r.client.PatchStatus(context.TODO(), federation, nil, k8sclient.PatchOption{

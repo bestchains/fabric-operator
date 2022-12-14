@@ -56,7 +56,7 @@ type FederationStatus struct {
 	CRStatus `json:",inline"`
 
 	// TODO: save networks under this federation
-	Networks []NamespacedName `json:"networks,omitempty"`
+	Networks []string `json:"networks,omitempty"`
 }
 
 // +kubebuilder:object:root=true

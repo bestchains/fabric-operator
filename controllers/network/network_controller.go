@@ -176,14 +176,14 @@ func (r *ReconcileNetwork) Reconcile(ctx context.Context, request reconcile.Requ
 	}
 
 	update := r.GetUpdateStatus(instance)
-	reqLogger.Info(fmt.Sprintf("Reconciling Network '%s' with update values of [ %+v ]", instance.GetNamespacedName(), update.GetUpdateStackWithTrues()))
+	reqLogger.Info(fmt.Sprintf("Reconciling Network '%s' with update values of [ %+v ]", instance.GetName(), update.GetUpdateStackWithTrues()))
 
-	result, err := r.Offering.Reconcile(instance, r.PopUpdate(instance.GetNamespacedName()))
+	result, err := r.Offering.Reconcile(instance, r.PopUpdate(instance.GetName()))
 	if err != nil {
 		if setStatuErr := r.SetErrorStatus(instance, err); setStatuErr != nil {
 			return reconcile.Result{}, operatorerrors.IsBreakingError(setStatuErr, "failed to update status", log)
 		}
-		return reconcile.Result{}, operatorerrors.IsBreakingError(errors.Wrapf(err, "Network instance '%s' encountered error", instance.GetNamespacedName()), "stopping reconcile loop", log)
+		return reconcile.Result{}, operatorerrors.IsBreakingError(errors.Wrapf(err, "Network instance '%s' encountered error", instance.GetName()), "stopping reconcile loop", log)
 	} else {
 		setStatusErr := r.SetStatus(instance, result.Status)
 		if setStatusErr != nil {
@@ -192,16 +192,16 @@ func (r *ReconcileNetwork) Reconcile(ctx context.Context, request reconcile.Requ
 	}
 
 	if result.Requeue {
-		r.PushUpdate(instance.GetNamespacedName(), *update)
+		r.PushUpdate(instance.GetName(), *update)
 	}
 
-	reqLogger.Info(fmt.Sprintf("Finished reconciling Network '%s' with update values of [ %+v ]", instance.GetNamespacedName(), update.GetUpdateStackWithTrues()))
+	reqLogger.Info(fmt.Sprintf("Finished reconciling Network '%s' with update values of [ %+v ]", instance.GetName(), update.GetUpdateStackWithTrues()))
 
 	// If the stack still has items that require processing, keep reconciling
 	// until the stack has been cleared
-	_, found := r.update[instance.GetNamespacedName()]
+	_, found := r.update[instance.GetName()]
 	if found {
-		if len(r.update[instance.GetNamespacedName()]) > 0 {
+		if len(r.update[instance.GetName()]) > 0 {
 			return reconcile.Result{
 				Requeue: true,
 			}, nil
@@ -215,7 +215,7 @@ func (r *ReconcileNetwork) Reconcile(ctx context.Context, request reconcile.Requ
 func (r *ReconcileNetwork) SetStatus(instance *current.Network, reconcileStatus *current.CRStatus) error {
 	var err error
 
-	log.Info(fmt.Sprintf("Setting status for '%s'", instance.GetNamespacedName()))
+	log.Info(fmt.Sprintf("Setting status for '%s'", instance.GetName()))
 
 	if err = r.client.Get(context.TODO(), types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}, instance); err != nil {
 		return err
@@ -267,7 +267,7 @@ func (r *ReconcileNetwork) SetErrorStatus(instance *current.Network, reconcileEr
 		return errors.Wrap(err, "failed to save spec state")
 	}
 
-	log.Info(fmt.Sprintf("Setting error status for '%s'", instance.GetNamespacedName()))
+	log.Info(fmt.Sprintf("Setting error status for '%s'", instance.GetName()))
 
 	status := instance.Status.CRStatus
 	status.Type = current.Error

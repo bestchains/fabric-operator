@@ -13,7 +13,7 @@ spec:
     listKind: NetworkList
     plural: networks
     singular: network
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v1beta1
     schema:

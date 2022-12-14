@@ -104,11 +104,11 @@ func DifferMembers(old []Member, new []Member) (added []Member, removed []Member
 	return
 }
 
-func (federationStatus *FederationStatus) AddNetwork(network NamespacedName) bool {
+func (federationStatus *FederationStatus) AddNetwork(network string) bool {
 	var conflict bool
 
 	for _, f := range federationStatus.Networks {
-		if f.String() == network.String() {
+		if f == network {
 			conflict = true
 			break
 		}
@@ -121,14 +121,14 @@ func (federationStatus *FederationStatus) AddNetwork(network NamespacedName) boo
 	return conflict
 }
 
-func (federationStatus *FederationStatus) DeleteNetwork(network NamespacedName) bool {
+func (federationStatus *FederationStatus) DeleteNetwork(network string) bool {
 	var exist bool
 	var index int
 
 	networks := federationStatus.Networks
 
 	for curr, f := range networks {
-		if f.String() == network.String() {
+		if f == network {
 			exist = true
 			index = curr
 			break

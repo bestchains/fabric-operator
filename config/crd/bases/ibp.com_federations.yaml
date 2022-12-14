@@ -89,12 +89,7 @@ spec:
               networks:
                 description: 'TODO: save networks under this federation'
                 items:
-                  properties:
-                    name:
-                      type: string
-                    namespace:
-                      type: string
-                  type: object
+                  type: string
                 type: array
               reason:
                 description: Reason provides a reason for an error

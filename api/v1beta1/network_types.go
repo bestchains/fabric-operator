@@ -47,9 +47,9 @@ type NetworkStatus struct {
 	CRStatus `json:",inline"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Cluster
 // Network is the Schema for the networks API
 type Network struct {
 	metav1.TypeMeta   `json:",inline"`

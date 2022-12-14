@@ -802,7 +802,7 @@ func (in *FederationStatus) DeepCopyInto(out *FederationStatus) {
 	out.CRStatus = in.CRStatus
 	if in.Networks != nil {
 		in, out := &in.Networks, &out.Networks
-		*out = make([]NamespacedName, len(*in))
+		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
 }

@@ -70,7 +70,7 @@ var _ = Describe("K8S Network Overrides", func() {
 		}
 
 		mockedBaseOverrider.CreateClusterRoleStub = func(f *current.Network, cr *rbacv1.ClusterRole) error {
-			cr.Name = f.GetNamespacedName()
+			cr.Name = f.GetName()
 			cr.Namespace = f.GetNamespace()
 
 			cr.Rules = append(cr.Rules, rbacv1.PolicyRule{
@@ -85,12 +85,12 @@ var _ = Describe("K8S Network Overrides", func() {
 		mockedBaseOverrider.UpdateClusterRoleStub = mockedBaseOverrider.CreateClusterRoleStub
 
 		mockedBaseOverrider.CreateClusterRoleBindingStub = func(f *current.Network, crb *rbacv1.ClusterRoleBinding) error {
-			crb.Name = f.GetNamespacedName()
+			crb.Name = f.GetName()
 			crb.Namespace = f.GetNamespace()
 
 			crb.RoleRef = rbacv1.RoleRef{
 				Kind: "ClusterRole",
-				Name: f.GetNamespacedName(),
+				Name: f.GetName(),
 			}
 
 			subjects := make([]rbacv1.Subject, 0, len(instance.GetMembers()))
@@ -151,7 +151,7 @@ func ValidateClusterRole(instance *current.Network, cr *rbacv1.ClusterRole) {
 func ValidateClusterRoleBinding(instance *current.Network, crb *rbacv1.ClusterRoleBinding) {
 	By("setting roleRef", func() {
 		Expect(crb.RoleRef.Kind).To(Equal("ClusterRole"))
-		Expect(crb.RoleRef.Name).To(Equal(instance.GetNamespacedName()))
+		Expect(crb.RoleRef.Name).To(Equal(instance.GetName()))
 	})
 
 	By("setting subjects", func() {
