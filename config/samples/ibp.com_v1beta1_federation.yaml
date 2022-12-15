@@ -11,5 +11,6 @@ spec:
   members:
     - name: org1
       initiator: true
+      namespace: org1
     - name: org2
       namespace: org2

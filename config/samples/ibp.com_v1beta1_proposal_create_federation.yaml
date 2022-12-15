@@ -8,4 +8,5 @@ spec:
   policy: All
   initiator:
     name: org1
+    namespace: org1
   createFederation: {}
