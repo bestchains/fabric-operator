@@ -385,24 +385,17 @@ const (
 const BlockchainAnnotationKey = "bestchains"
 
 type BlockchainAnnotation struct {
-	// Organization info
 	Organization string `json:"organization,omitempty"`
 	Namespace    string `json:"namespace,omitempty"`
 
-	// Managed Peers & Orderers
-	Peers    map[string]string `json:"peers,omitempty"`
-	Orderers map[string]string `json:"orderers,omitempty"`
+	IDs map[string]ID `json:"ids,omitempty"`
+}
 
-	// Enrollment
-	EnrollmentID           string `json:"hf.EnrollmentID,omitempty"`
-	Type                   string `json:"hf.Type,omitempty"`
-	Affiliation            string `json:"hf.Affiliation,omitempty"`
-	RegistrarRoles         string `json:"hf.Registrar.Roles,omitempty"`
-	RegistrarDelegateRoles string `json:"hf.Registrar.DelegateRoles,omitempty"`
-	Revoker                string `json:"hf.Revoker,omitempty"`
-	IntermediateCA         string `json:"hf.IntermediateCA,omitempty"`
-	GenCRL                 string `json:"hf.GenCRL,omitempty"`
-	RegistrarAttributes    string `json:"hf.Registrar.Attributes,omitempty"`
+type ID struct {
+	Name         string            `json:"name"`
+	Type         string            `json:"type"`
+	Attributes   map[string]string `json:"attributes"`
+	CreationTime string            `json:"creationTime"`
 }
 
 type BlockchainAnnotationList struct {

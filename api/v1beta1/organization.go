@@ -53,21 +53,11 @@ func (organization *Organization) GetAnnotationKey() string {
 	return organization.GetName()
 }
 
-func (organization *Organization) GetAdminAnnotations() BlockchainAnnotation {
-	return BlockchainAnnotation{
+func (organization *Organization) GetAnnotation() *BlockchainAnnotation {
+	return &BlockchainAnnotation{
 		Organization: organization.GetName(),
 		Namespace:    organization.GetUserNamespace(),
-
-		// Enrollment parts
-		EnrollmentID:           organization.Spec.Admin,
-		Type:                   "admin",
-		Affiliation:            "",
-		RegistrarRoles:         "*",
-		RegistrarDelegateRoles: "*",
-		Revoker:                "*",
-		IntermediateCA:         "true",
-		GenCRL:                 "true",
-		RegistrarAttributes:    "*",
+		IDs:          make(map[string]ID),
 	}
 }
 

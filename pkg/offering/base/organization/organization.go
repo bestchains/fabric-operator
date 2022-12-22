@@ -297,9 +297,10 @@ func SetAdminAnnotations(iamuser *iam.User, instance *current.Organization) erro
 		return err
 	}
 
-	adminAnnotation := instance.GetAdminAnnotations()
+	annotation := instance.GetAnnotation()
+	annotation.AddID(current.BuildAdminID(instance.Spec.Admin))
 
-	_, err = annotationList.SetOrUpdateAnnotation(instance.GetAnnotationKey(), adminAnnotation)
+	_, err = annotationList.SetOrUpdateAnnotation(instance.GetAnnotationKey(), *annotation)
 	if err != nil {
 		return err
 	}

@@ -75,16 +75,17 @@ func (annotations *BlockchainAnnotationList) Unmarshal(raw []byte) error {
 	return json.Unmarshal(raw, annotations)
 }
 
-func (annotations *BlockchainAnnotationList) GetAnnotation(k string) (BlockchainAnnotation, error) {
+func (annotations *BlockchainAnnotationList) GetAnnotation(org string) (BlockchainAnnotation, error) {
 	if annotations == nil {
 		return BlockchainAnnotation{}, errors.New("nil annotation list")
 	}
-	annotation, ok := annotations.List[k]
+	annotation, ok := annotations.List[org]
 	if !ok {
 		return BlockchainAnnotation{}, errors.New("annotation not exist")
 	}
 	return annotation, nil
 }
+
 func (annotations *BlockchainAnnotationList) SetOrUpdateAnnotation(k string, annotation BlockchainAnnotation) (bool, error) {
 	if annotations == nil {
 		return false, errors.New("nil annotation list")
@@ -108,4 +109,88 @@ func (annotations *BlockchainAnnotationList) DeleteAnnotation(k string) error {
 	delete(annotations.List, k)
 	annotations.LastDeleteTime = time.Now().String()
 	return nil
+}
+
+func (annotation *BlockchainAnnotation) GetID(k string) (ID, bool) {
+	if annotation.IDs == nil {
+		annotation.IDs = make(map[string]ID)
+	}
+	id, ok := annotation.IDs[k]
+	return id, ok
+}
+
+func (annotation *BlockchainAnnotation) AddID(id ID) bool {
+	if annotation.IDs == nil {
+		annotation.IDs = make(map[string]ID)
+	}
+	_, override := annotation.IDs[id.Name]
+	annotation.IDs[id.Name] = id
+	return override
+}
+
+func (annotation *BlockchainAnnotation) RemoveID(id ID) bool {
+	if annotation.IDs == nil {
+		annotation.IDs = make(map[string]ID)
+	}
+	_, exist := annotation.IDs[id.Name]
+	delete(annotation.IDs, id.Name)
+	return exist
+}
+
+func BuildAdminID(id string) ID {
+	return ID{
+		Name: id,
+		Type: "admin",
+		Attributes: map[string]string{
+			"hf.EnrollmentID":            id,
+			"hf.Type":                    "admin",
+			"hf.Affiliation":             "",
+			"hf.Registrar.Roles":         "*",
+			"hf.RegistrarDelegateRoles":  "*",
+			"hf.Revoker":                 "*",
+			"hf.IntermediateCA":          "true",
+			"hf.GenCRL":                  "true",
+			"hf.hf.Registrar.Attributes": "*",
+		},
+		CreationTime: time.Now().String(),
+	}
+}
+
+func BuildClientID(id string) ID {
+	return ID{
+		Name: id,
+		Type: "client",
+		Attributes: map[string]string{
+			"hf.EnrollmentID": id,
+			"hf.Type":         "client",
+			"hf.Affiliation":  "",
+		},
+		CreationTime: time.Now().String(),
+	}
+}
+
+func BuildPeerID(id string) ID {
+	return ID{
+		Name: id,
+		Type: "peer",
+		Attributes: map[string]string{
+			"hf.EnrollmentID": id,
+			"hf.Type":         "peer",
+			"hf.Affiliation":  "",
+		},
+		CreationTime: time.Now().String(),
+	}
+}
+
+func BuildOrdererID(id string) ID {
+	return ID{
+		Name: id,
+		Type: "orderer",
+		Attributes: map[string]string{
+			"hf.EnrollmentID": id,
+			"hf.Type":         "orderer",
+			"hf.Affiliation":  "",
+		},
+		CreationTime: time.Now().String(),
+	}
 }
