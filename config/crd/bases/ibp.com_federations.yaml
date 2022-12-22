@@ -71,6 +71,7 @@ spec:
                 type: string
             required:
             - license
+            - policy
             type: object
           status:
             description: FederationStatus defines the observed state of Federation

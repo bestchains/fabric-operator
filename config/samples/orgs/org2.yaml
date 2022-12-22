@@ -13,7 +13,7 @@ spec:
       accept: true
     images:
       caImage: hyperledgerk8s/fabric-ca
-      caTag: "1.5.5"
+      caTag: "1.5.5-iam"
       caInitImage: hyperledgerk8s/ubi-minimal
       caInitTag: latest
     resources:

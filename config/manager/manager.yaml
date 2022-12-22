@@ -42,38 +42,29 @@ spec:
     metadata:
       labels:
         control-plane: controller-manager
+        name: controller-manager
     spec:
       containers:
-        - command:
-            - /manager
-          args:
-            - --enable-leader-election
-          image: controller:latest
-          name: manager
-          resources:
-            limits:
-              cpu: 100m
-              memory: 30Mi
-            requests:
-              cpu: 100m
-              memory: 20Mi
         - command:
             - ibp-operator
           env:
             - name: WATCH_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            - name: OPERATOR_NAMESPACE
+              value: "operator-system"
             - name: OPERATOR_NAME
-              value: operator
+              value: "fabric-operator"
             - name: CLUSTERTYPE
-              value: OPENSHIFT
-          image: todo:update
-          imagePullPolicy: Always
+              value: K8S
+            - name: OPERATOR_INGRESS_DOMAIN
+              value: 172.22.50.142.nip.io
+            - name: OPERATOR_IAM_SERVER
+              value: https://oidc-server.u4a-system.svc
+          image: hyperledgerk8s/fabric-operator:latest-amd64
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
             initialDelaySeconds: 10
@@ -108,16 +99,15 @@ spec:
             readOnlyRootFilesystem: false
             runAsNonRoot: false
             runAsUser: 1001
+      tolerations:
+      - operator: "Exists"
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: kubernetes.io/arch
-                    operator: In
-                    values:
-                      - amd64
-                      - s390x
+                  - key: fabric-operator
+                    operator: Exists
       hostIPC: false
       hostNetwork: false
       hostPID: false
@@ -125,5 +115,5 @@ spec:
         fsGroup: 2000
         runAsNonRoot: true
         runAsUser: 1001
-      serviceAccountName: controller-manager
+      serviceAccountName: operator-controller-manager
       terminationGracePeriodSeconds: 10

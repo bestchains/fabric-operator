@@ -115,7 +115,7 @@ rules:
     resources:
       - namespaces
     verbs:
-      - get
+      - "*"
   - apiGroups:
       - apps
     resources:

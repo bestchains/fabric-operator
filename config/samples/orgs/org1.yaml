@@ -12,7 +12,7 @@ spec:
     license:
       accept: true
     images:
-      caImage: hyperledgerk8s/fabric-ca
+      caImage: config/rbac/role_binding.yaml/fabric-ca
       caTag: "1.5.5-iam"
       caInitImage: hyperledgerk8s/ubi-minimal
       caInitTag: latest

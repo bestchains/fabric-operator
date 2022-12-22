@@ -358,6 +358,7 @@ spec:
                     type: boolean
                 type: object
             required:
+            - admin
             - license
             type: object
           status:
