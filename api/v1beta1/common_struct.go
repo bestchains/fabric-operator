@@ -391,9 +391,18 @@ type BlockchainAnnotation struct {
 	IDs map[string]ID `json:"ids,omitempty"`
 }
 
+type IDType string
+
+const (
+	Admin   IDType = "admin"
+	Client  IDType = "client"
+	Peer    IDType = "peer"
+	Orderer IDType = "orderer"
+)
+
 type ID struct {
 	Name         string            `json:"name"`
-	Type         string            `json:"type"`
+	Type         IDType            `json:"type"`
 	Attributes   map[string]string `json:"attributes"`
 	CreationTime string            `json:"creationTime"`
 }

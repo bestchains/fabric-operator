@@ -114,6 +114,7 @@ func (annotations *BlockchainAnnotationList) DeleteAnnotation(k string) error {
 func (annotation *BlockchainAnnotation) GetID(k string) (ID, bool) {
 	if annotation.IDs == nil {
 		annotation.IDs = make(map[string]ID)
+		return ID{}, false
 	}
 	id, ok := annotation.IDs[k]
 	return id, ok
@@ -130,7 +131,7 @@ func (annotation *BlockchainAnnotation) AddID(id ID) bool {
 
 func (annotation *BlockchainAnnotation) RemoveID(id ID) bool {
 	if annotation.IDs == nil {
-		annotation.IDs = make(map[string]ID)
+		return false
 	}
 	_, exist := annotation.IDs[id.Name]
 	delete(annotation.IDs, id.Name)
@@ -140,10 +141,10 @@ func (annotation *BlockchainAnnotation) RemoveID(id ID) bool {
 func BuildAdminID(id string) ID {
 	return ID{
 		Name: id,
-		Type: "admin",
+		Type: Admin,
 		Attributes: map[string]string{
 			"hf.EnrollmentID":            id,
-			"hf.Type":                    "admin",
+			"hf.Type":                    string(Admin),
 			"hf.Affiliation":             "",
 			"hf.Registrar.Roles":         "*",
 			"hf.RegistrarDelegateRoles":  "*",
@@ -159,10 +160,10 @@ func BuildAdminID(id string) ID {
 func BuildClientID(id string) ID {
 	return ID{
 		Name: id,
-		Type: "client",
+		Type: Client,
 		Attributes: map[string]string{
 			"hf.EnrollmentID": id,
-			"hf.Type":         "client",
+			"hf.Type":         string(Client),
 			"hf.Affiliation":  "",
 		},
 		CreationTime: time.Now().String(),
@@ -172,10 +173,10 @@ func BuildClientID(id string) ID {
 func BuildPeerID(id string) ID {
 	return ID{
 		Name: id,
-		Type: "peer",
+		Type: Peer,
 		Attributes: map[string]string{
 			"hf.EnrollmentID": id,
-			"hf.Type":         "peer",
+			"hf.Type":         string(Peer),
 			"hf.Affiliation":  "",
 		},
 		CreationTime: time.Now().String(),
@@ -185,10 +186,10 @@ func BuildPeerID(id string) ID {
 func BuildOrdererID(id string) ID {
 	return ID{
 		Name: id,
-		Type: "orderer",
+		Type: Orderer,
 		Attributes: map[string]string{
 			"hf.EnrollmentID": id,
-			"hf.Type":         "orderer",
+			"hf.Type":         string(Orderer),
 			"hf.Affiliation":  "",
 		},
 		CreationTime: time.Now().String(),
