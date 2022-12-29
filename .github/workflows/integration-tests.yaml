@@ -79,3 +79,4 @@ jobs:
 #          make integration-tests
         env:
           INT_TEST_NAME: ${{ matrix.suite }}
+          WEBHOOK_DISABLED: true

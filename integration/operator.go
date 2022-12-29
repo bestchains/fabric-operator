@@ -25,6 +25,9 @@ import (
 	"path/filepath"
 
 	config "github.com/IBM-Blockchain/fabric-operator/operatorconfig"
+	fedinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/federation"
+	netinit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/network"
+	orginit "github.com/IBM-Blockchain/fabric-operator/pkg/initializer/organization"
 
 	"github.com/IBM-Blockchain/fabric-operator/pkg/apis/common"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/apis/deployer"
@@ -39,7 +42,7 @@ import (
 
 // GetOperatorConfig returns the operator configuration with the default templating files population
 // and with default versions set for components.
-func GetOperatorConfig(configs, caFiles, peerFiles, ordererFiles, consoleFiles, voteFiles string) *config.Config {
+func GetOperatorConfig(configs, caFiles, peerFiles, ordererFiles, consoleFiles, voteFiles, organizationFiles, federationFiles, networkFiles string) *config.Config {
 	ulevel := uzap.NewAtomicLevelAt(2)
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		ulevel = uzap.NewAtomicLevelAt(-1)
@@ -108,6 +111,18 @@ func GetOperatorConfig(configs, caFiles, peerFiles, ordererFiles, consoleFiles, 
 			RoleBindingFile:    filepath.Join(voteFiles, "rolebinding.yaml"),
 			ServiceAccountFile: filepath.Join(voteFiles, "serviceaccount.yaml"),
 		},
+		OrganizationInitConfig: &orginit.Config{
+			IAMEnabled:             os.Getenv("OPERATOR_USER_TYPE") != "sa",
+			AdminRoleFile:          filepath.Join(organizationFiles, "admin_role.yaml"),
+			ClientRoleFile:         filepath.Join(organizationFiles, "client_role.yaml"),
+			RoleBindingFile:        filepath.Join(organizationFiles, "role_binding.yaml"),
+			ClusterRoleFile:        filepath.Join(organizationFiles, "cluster_role.yaml"),
+			ClusterRoleBindingFile: filepath.Join(organizationFiles, "cluster_role_binding.yaml"),
+			CAFile:                 filepath.Join(organizationFiles, "ca.yaml"),
+			StoragePath:            "/tmp/orginit",
+		},
+		FederationInitConfig: &fedinit.Config{},
+		NetworkInitConfig:    &netinit.Config{},
 		ConsoleInitConfig: &config.ConsoleConfig{
 			DeploymentFile:           filepath.Join(consoleFiles, "deployment.yaml"),
 			PVCFile:                  filepath.Join(consoleFiles, "pvc.yaml"),
@@ -132,6 +147,7 @@ func GetOperatorConfig(configs, caFiles, peerFiles, ordererFiles, consoleFiles, 
 	}
 
 	setDefaultVersions(cfg)
+	config.SetOperatorConfigFromEnvironment(operatorCfg)
 	return cfg
 }
 

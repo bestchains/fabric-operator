@@ -33,6 +33,7 @@ import (
 	ibpclient "github.com/IBM-Blockchain/fabric-operator/pkg/client"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/command"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/util"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -214,6 +215,7 @@ func DeployOperator(ginkgoWriter io.Writer, signal context.Context, cfg *Config,
 	if err != nil {
 		return err
 	}
+	sa.Namespace = namespace
 	_, err = kclient.CoreV1().ServiceAccounts(namespace).Create(context.TODO(), sa, metav1.CreateOptions{})
 	if err != nil {
 		return err
@@ -224,6 +226,7 @@ func DeployOperator(ginkgoWriter io.Writer, signal context.Context, cfg *Config,
 	if err != nil {
 		return err
 	}
+	role.Namespace = namespace
 	_, err = kclient.RbacV1().ClusterRoles().Create(context.TODO(), role, metav1.CreateOptions{})
 	if err != nil {
 		if !k8serrors.IsAlreadyExists(err) {
@@ -236,7 +239,7 @@ func DeployOperator(ginkgoWriter io.Writer, signal context.Context, cfg *Config,
 	if err != nil {
 		return err
 	}
-
+	roleBinding.Namespace = namespace
 	roleBinding.Name = fmt.Sprintf("operator-%s", namespace)
 	roleBinding.Subjects[0].Namespace = namespace
 
@@ -282,7 +285,11 @@ func DeployOperator(ginkgoWriter io.Writer, signal context.Context, cfg *Config,
 	if err != nil {
 		return err
 	}
-
+	wh := envtest.WebhookInstallOptions{LocalServingCertDir: "/tmp/k8s-webhook-server/serving-certs"}
+	err = wh.PrepWithoutInstalling()
+	if err != nil {
+		return err
+	}
 	err = command.OperatorWithSignal(operatorCfg, signal, false, true)
 	if err != nil {
 		return err
@@ -488,5 +495,8 @@ func getOperatorCfg() *config.Config {
 	defaultOrdererDef := filepath.Join(defaultDef, "orderer")
 	defaultConsoleDef := filepath.Join(defaultDef, "console")
 	defaultVoteDef := filepath.Join(defaultDef, "vote")
-	return GetOperatorConfig(defaultConfigs, defaultCADef, defaultPeerDef, defaultOrdererDef, defaultConsoleDef, defaultVoteDef)
+	defaultOrganizationDef := filepath.Join(defaultDef, "organization")
+	defaultFederationDef := filepath.Join(defaultDef, "federation")
+	defaultNetworkDef := filepath.Join(defaultDef, "network")
+	return GetOperatorConfig(defaultConfigs, defaultCADef, defaultPeerDef, defaultOrdererDef, defaultConsoleDef, defaultVoteDef, defaultOrganizationDef, defaultFederationDef, defaultNetworkDef)
 }

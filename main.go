@@ -86,7 +86,7 @@ func main() {
 
 	operatorCfg.Operator.SetDefaults()
 
-	setOperatorConfigFromEnvironment(operatorCfg)
+	config.SetOperatorConfigFromEnvironment(operatorCfg)
 
 	if err := command.Operator(operatorCfg); err != nil {
 		log.Error(err, "failed to start operator")
@@ -240,14 +240,4 @@ func setDefaultVoteDefinitions(cfg *config.Config) {
 
 func setDefaultNetworkDefinitions(cfg *config.Config) {
 	cfg.NetworkInitConfig = &netinit.Config{}
-}
-
-func setOperatorConfigFromEnvironment(cfg *config.Config) {
-	if domain := os.Getenv("OPERATOR_INGRESS_DOMAIN"); domain != "" {
-		cfg.Operator.IngressDomain = domain
-	}
-	if iamServer := os.Getenv("OPERATOR_IAM_SERVER"); iamServer != "" {
-		cfg.Operator.IAM.Enabled = true
-		cfg.Operator.IAM.Server = iamServer
-	}
 }
