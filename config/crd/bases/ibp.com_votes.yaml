@@ -53,7 +53,7 @@ spec:
                 description: VotePhase is a label for the condition of a vote at the
                   current time.
                 type: string
-              startTime:
+              voteTime:
                 description: Timestamp of voting.
                 format: date-time
                 type: string

@@ -408,6 +408,10 @@ func (r *ReconcileProposal) VoteCreateFunc(e event.CreateEvent) bool {
 	// todo check other phase should not occur.
 
 	voteResult := current.VoteResult{
+		Vote: current.NamespacedName{
+			Name:      vote.Name,
+			Namespace: vote.Namespace,
+		},
 		Organization: vote.GetOrganization(),
 		Phase:        vote.Status.Phase,
 	}
@@ -443,6 +447,10 @@ func (r *ReconcileProposal) VoteUpdateFunc(e event.UpdateEvent) bool {
 	}
 
 	voteResult := current.VoteResult{
+		Vote: current.NamespacedName{
+			Name:      newVote.Name,
+			Namespace: newVote.Namespace,
+		},
 		Organization: newVote.GetOrganization(), // todo vote -> org name
 		Decision:     newVote.Spec.Decision,
 		Description:  newVote.Spec.Description,

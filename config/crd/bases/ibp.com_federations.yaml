@@ -59,6 +59,11 @@ spec:
                   properties:
                     initiator:
                       type: boolean
+                    joinedAt:
+                      format: date-time
+                      type: string
+                    joinedBy:
+                      type: string
                     name:
                       type: string
                     namespace:

@@ -174,6 +174,23 @@ func (r *ReconcileFederation) ProposalUpdateFunc(e event.UpdateEvent) bool {
 						update.proposalFailed = true
 					case current.ProposalSucceeded:
 						update.proposalActivated = true
+						fed := &current.Federation{}
+						if err := r.client.Get(context.TODO(), types.NamespacedName{Name: newProposal.Spec.Federation}, fed); err != nil {
+							log.Error(err, fmt.Sprintf("cant find federation %s", newProposal.Spec.Federation))
+							return false
+						}
+						for i := range fed.Spec.Members {
+							if !fed.Spec.Members[i].JoinedAt.IsZero() {
+								continue
+							}
+							// todo: what about initiator member?
+							fed.Spec.Members[i].JoinedBy = newProposal.Name
+							fed.Spec.Members[i].JoinedAt = metav1.Now()
+						}
+						if err := r.client.Update(context.TODO(), fed); err != nil {
+							log.Error(err, fmt.Sprintf("cant update federation %s", newProposal.Spec.Federation))
+							return false
+						}
 					}
 				} else if newProposal.Spec.AddMember != nil {
 					if c.Type == current.ProposalSucceeded {
@@ -186,6 +203,8 @@ func (r *ReconcileFederation) ProposalUpdateFunc(e event.UpdateEvent) bool {
 							fed.Spec.Members = append(fed.Spec.Members, current.Member{
 								NamespacedName: m,
 								Initiator:      false,
+								JoinedBy:       newProposal.Name,
+								JoinedAt:       metav1.Now(),
 							})
 						}
 						if err := r.client.Update(context.TODO(), fed); err != nil {

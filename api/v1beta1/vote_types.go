@@ -54,7 +54,7 @@ type VoteStatus struct {
 	Phase VotePhase `json:"phase,omitempty"`
 	// Timestamp of voting.
 	// +optional
-	VoteTime metav1.Time `json:"startTime,omitempty"`
+	VoteTime metav1.Time `json:"voteTime,omitempty"`
 }
 
 func init() {

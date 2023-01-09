@@ -159,12 +159,20 @@ spec:
                       description: VotePhase is a label for the condition of a vote
                         at the current time.
                       type: string
-                    startTime:
+                    vote:
+                      properties:
+                        name:
+                          type: string
+                        namespace:
+                          type: string
+                      type: object
+                    voteTime:
                       format: date-time
                       type: string
                   required:
                   - description
                   - organization
+                  - vote
                   type: object
                 type: array
             type: object

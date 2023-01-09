@@ -20,6 +20,7 @@ package v1beta1
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -55,6 +56,16 @@ func (r *Proposal) Default() {
 	}
 	if r.Spec.EndAt.IsZero() {
 		r.Spec.EndAt = metav1.NewTime(time.Now().Add(time.Hour * 24))
+	}
+	switch strings.ToLower(string(r.Spec.Policy)) {
+	case strings.ToLower(string(ALL)):
+		r.Spec.Policy = ALL
+	case strings.ToLower(string(Majority)):
+		r.Spec.Policy = Majority
+	case strings.ToLower(string(OneVoteVeto)):
+		r.Spec.Policy = OneVoteVeto
+	default:
+		r.Spec.Policy = ALL
 	}
 }
 
