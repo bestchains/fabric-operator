@@ -46,7 +46,6 @@ import (
 
 const (
 	maxRetryCount = 10
-	adminCertPath = "/fabric-operator/certs/admin"
 	mspConfig     = `
 NodeOUs:
   Enable: true
@@ -190,14 +189,16 @@ func (organization *Organization) enrollArg(ctx context.Context, namespace, name
 
 func (organization *Organization) DoEnroll(ctx context.Context, instance *current.Organization) {
 	log.Info("starting do enroll for admin and org")
-	defer os.RemoveAll(adminCertPath)
 
 	enrollment, profileStr, err := organization.enrollArg(ctx, instance.GetName(), instance.GetName(), instance.Spec.Admin, instance.Spec.AdminToken)
 	if err != nil {
 		return
 	}
 	certBytes, _ := enrollment.GetCATLSBytes()
-	caClient := enroller.NewFabCAClient(enrollment, adminCertPath, nil, certBytes)
+	storagePath := organization.BaseOrganization.Config.OrganizationInitConfig.StoragePath + fmt.Sprintf("/%s/%s", instance.GetName(), instance.Spec.Admin)
+	defer os.RemoveAll(storagePath)
+
+	caClient := enroller.NewFabCAClient(enrollment, storagePath, nil, certBytes)
 	certEnroller := enroller.New(enroller.NewSWEnroller(caClient))
 
 	resp, err := config1.GenerateCrypto(certEnroller)
@@ -207,7 +208,7 @@ func (organization *Organization) DoEnroll(ctx context.Context, instance *curren
 	}
 
 	s := v1.Secret{}
-	s.Name = instance.GetName() + "-msg-crypto"
+	s.Name = instance.GetName() + "-msp-crypto"
 	s.Namespace = instance.GetName()
 	s.Data = make(map[string][]byte)
 	s.Data["admin-signcert"] = resp.SignCert
@@ -222,10 +223,10 @@ func (organization *Organization) DoEnroll(ctx context.Context, instance *curren
 			log.Error(err, "create secret %s error.", s.GetName())
 			return
 		}
-		log.Info("secret %s already exists, try to update...\n")
+		log.Info(fmt.Sprintf("secret %s already exists, try to update...", s.GetName()))
 
 		if organization.BaseOrganization.Client.Get(ctx, types.NamespacedName{Namespace: instance.GetName(), Name: s.GetName()}, &s); err != nil {
-			log.Error(err, "get secret %s error", s.GetName())
+			log.Error(fmt.Sprintf("get secret %s error %s", s.GetName(), err))
 			return
 		}
 
