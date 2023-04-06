@@ -20,13 +20,18 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	iam "github.com/IBM-Blockchain/fabric-operator/api/iam/v1alpha1"
+	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
 	"github.com/IBM-Blockchain/fabric-operator/pkg/k8s/controllerclient"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
+
+var log = logf.Log.WithName("gggg")
 
 type UnaryAction string
 
@@ -241,6 +246,51 @@ func ListUsers(c controllerclient.Client, selector labels.Selector) (*iam.UserLi
 	err := c.List(context.TODO(), userList, &client.ListOptions{
 		LabelSelector: selector,
 	})
+	for i, u := range userList.Items {
+		log.Info(fmt.Sprintf("%d, name:%s, label:%s", i, u.Name, u.Labels))
+	}
+	userList1 := &iam.UserList{}
+	_ = c.List(context.TODO(), userList1)
+	for i, u := range userList1.Items {
+		log.Info(fmt.Sprintf("full %d, name:%s, label:%s", i, u.Name, u.Labels))
+	}
+
+	selector1 := labels.SelectorFromSet(map[string]string{current.NETWORK_FEDERATION_LABEL: "federation-sample"})
+	n1 := &current.NetworkList{}
+	_ = c.List(context.TODO(), n1, &client.ListOptions{LabelSelector: selector1})
+	log.Info(fmt.Sprintf("use selector to get network label %s, get data len %d", selector1.String(), len(n1.Items)))
+	if len(n1.Items) > 0 {
+		log.Info("use selector to get network label, get data, show name and selector")
+		for _, n := range n1.Items {
+			log.Info(fmt.Sprintf("show name %s and selector %v", n.Name, n.Labels))
+		}
+	}
+	n2 := &current.NetworkList{}
+	_ = c.List(context.TODO(), n2)
+	log.Info(fmt.Sprintf("list network full, get data len %d", len(n2.Items)))
+	if len(n2.Items) > 0 {
+		log.Info("list full get data, show name and selector")
+		for _, n := range n2.Items {
+			log.Info(fmt.Sprintf("show name %s and selector %v", n.Name, n.Labels))
+		}
+	}
+	selector2, err := labels.Parse(current.NETWORK_FEDERATION_LABEL + "=federation-sample")
+	if err != nil {
+		log.Error(err, "get error")
+	}
+	n3 := &current.NetworkList{}
+	_ = c.List(context.TODO(), n3, client.MatchingLabels{current.NETWORK_FEDERATION_LABEL: "federation-sample", current.NETWORK_INITIATOR_LABEL: "org1"})
+	log.Info(fmt.Sprintf("list network 3, get data len %d", len(n3.Items)))
+	if len(n3.Items) > 0 {
+		log.Info("list network 3 get data, show name and selector")
+		for _, n := range n3.Items {
+			log.Info(fmt.Sprintf("show name %s and selector %v", n.Name, n.Labels))
+		}
+		log.Info(fmt.Sprintf("1 selector %+v, 3 selector %+v", selector1, selector2))
+	}
+	if len(n2.Items) > 0 {
+		log.Info(fmt.Sprintf("finally, 1 selector %+v, 3 selector %+v", selector1, labels.SelectorFromSet(n2.Items[0].Labels)))
+	}
 	if err != nil {
 		return nil, err
 	}

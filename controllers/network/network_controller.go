@@ -202,6 +202,7 @@ func (r *ReconcileNetwork) Reconcile(ctx context.Context, request reconcile.Requ
 
 	if r.preCheck(instance) {
 		err = r.client.Update(context.TODO(), instance)
+		log.Info(fmt.Sprintf("ListNetwork1 update label:%+v", instance.GetLabels()))
 		return reconcile.Result{Requeue: true}, err
 	}
 

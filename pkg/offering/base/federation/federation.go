@@ -153,6 +153,8 @@ func (federation *BaseFederation) ReconcileManagers(instance *current.Federation
 				current.NETWORK_FEDERATION_LABEL, instance.GetName()))
 			return err
 		}
+		log.Info(fmt.Sprintf("Listnetwork1 by selector %s=%s, get %+v",
+			current.NETWORK_FEDERATION_LABEL, instance.GetName(), networkList.Items))
 		log.Info(fmt.Sprintf("sync federation %s members", instance.GetName()))
 		for i, n := range networkList.Items {
 			if n.Labels == nil || n.Labels[current.NETWORK_FEDERATION_LABEL] != instance.GetName() {

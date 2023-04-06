@@ -51,7 +51,7 @@ jobs:
       - build-image
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         no: [1, 2, 3, 4, 5]
     steps:

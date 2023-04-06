@@ -838,6 +838,7 @@ git diff --color-words --no-index old.json new.json && same=0 || same=1
 if [[ $same -eq 1 ]]; then
 	exit 1
 fi
+exit 1
 ################################################################################
 info "cache component image"
 source ${InstallDirPath}/scripts/cache-image.sh
