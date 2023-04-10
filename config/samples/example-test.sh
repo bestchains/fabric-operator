@@ -220,7 +220,7 @@ sed -i -e "s/<org3AdminToken>/${Admin3Token}/g" config/samples/orgs/org3.yaml
 info "4.1.1 create org=org1, wait for the relevant components to start up."
 kubectl create -f config/samples/orgs/org1.yaml --dry-run=client -o json |
 	jq '.spec.caSpec.ingress.class = "'$IngressClassName'"' | jq '.spec.caSpec.storage.ca.class = "'$StorageClassName'"' |
-	kubectl create --token=${Admin1Token} -f -
+	kubectl create --token=${Admin1Token}123 -f -
 function waitOrgReady() {
 	orgName=$1
 	wantFedName=$2
@@ -250,7 +250,7 @@ function waitOrgReady() {
 		sleep 5
 	done
 }
-waitOrgReady org1 "" ${Admin1Token}
+waitOrgReady org1 "" ${Admin1Token}123
 
 info "4.1.2 create org=org2, wait for the relevant components to start up."
 kubectl create -f config/samples/orgs/org2.yaml --dry-run=client -o json |
@@ -265,7 +265,7 @@ kubectl create -f config/samples/orgs/org3.yaml --dry-run=client -o json |
 waitOrgReady org3 "" ${Admin3Token}
 
 info "4.2 create federation resources: federation-sample"
-kubectl create -f config/samples/ibp.com_v1beta1_federation.yaml --token=${Admin1Token}
+kubectl create -f config/samples/ibp.com_v1beta1_federation.yaml --token=${Admin1Token}123
 function waitFed() {
 	fedName=$1
 	check=$2
@@ -302,14 +302,14 @@ function waitFed() {
 		sleep 5
 	done
 }
-waitFed federation-sample "Exist" ${Admin1Token}
-waitOrgReady "org1" "federation-sample" ${Admin1Token}
-waitOrgReady "org1" "federation-sample" ${Admin1Token}
+waitFed federation-sample "Exist" ${Admin1Token}123
+waitOrgReady "org1" "federation-sample" ${Admin1Token}123
+waitOrgReady "org1" "federation-sample" ${Admin1Token}123
 
 info "4.3 create federation create proposal for fed=federation-sample"
 
 info "4.3.1 create proposal pro=create-federation-sample"
-kubectl create -f config/samples/ibp.com_v1beta1_proposal_create_federation.yaml --token=${Admin1Token}
+kubectl create -f config/samples/ibp.com_v1beta1_proposal_create_federation.yaml --token=${Admin1Token}123
 
 info "4.3.2 user=org2admin vote for pro=create-federation-sample"
 function waitVoteExist() {
@@ -355,17 +355,17 @@ function waitProposalSucceeded() {
 		sleep 5
 	done
 }
-waitProposalSucceeded create-federation-sample ${Admin1Token}
+waitProposalSucceeded create-federation-sample ${Admin1Token}123
 
 info "4.3.4 fed=federation-sample become Activated, federation create finish!"
-waitFed federation-sample "Activated" ${Admin1Token}
+waitFed federation-sample "Activated" ${Admin1Token}123
 
 info "4.4 network management"
 info "4.4.1 create single orderer node network"
 sed -i -e "s/<org1AdminToken>/${Admin1Token}/g" config/samples/ibp.com_v1beta1_network.yaml
 kubectl create -f config/samples/ibp.com_v1beta1_network.yaml --dry-run=client -o json |
 	jq '.spec.orderSpec.ingress.class = "'$IngressClassName'"' | jq '.spec.orderSpec.storage.orderer.class = "'$StorageClassName'"' |
-	kubectl create --token=${Admin1Token} -f -
+	kubectl create --token=${Admin1Token}123 -f -
 function waitNetwork() {
 	networkName=$1
 	want=$2
@@ -410,19 +410,19 @@ function waitNetwork() {
 		sleep 5
 	done
 }
-waitNetwork network-sample "Ready" "" ${Admin1Token}
+waitNetwork network-sample "Ready" "" ${Admin1Token}123
 
 info "4.4.2 create 3 orderer node network"
 sed -i -e "s/<org1AdminToken>/${Admin1Token}/g" config/samples/ibp.com_v1beta1_network_size_3.yaml
 kubectl create -f config/samples/ibp.com_v1beta1_network_size_3.yaml --dry-run=client -o json |
 	jq '.spec.orderSpec.ingress.class = "'$IngressClassName'"' | jq '.spec.orderSpec.storage.orderer.class = "'$StorageClassName'"' |
-	kubectl create --token=${Admin1Token} -f -
-waitNetwork network-sample3 "Ready" "" ${Admin1Token}
+	kubectl create --token=${Admin1Token}123 -f -
+waitNetwork network-sample3 "Ready" "" ${Admin1Token}123
 
 info "4.4.3 delete network need create a federation dissolve network proposal for fed=federation-sample network=network-sample"
 
 info "4.4.3.1 create proposal pro=dissolve-network-sample"
-kubectl create -f config/samples/ibp.com_v1beta1_proposal_dissolve_network.yaml --token=${Admin1Token}
+kubectl create -f config/samples/ibp.com_v1beta1_proposal_dissolve_network.yaml --token=${Admin1Token}123
 
 info "4.4.3.2 user=org2admin vote for pro=dissolve-network-sample"
 waitVoteExist org2 dissolve-network-sample ${Admin2Token}
@@ -435,12 +435,12 @@ info "4.4.3.4 network=network-sample status.type become Dissolved, dissolve fini
 waitNetwork network-sample "Dissolved" "" ${Admin2Token}
 
 info "4.4.3.5 delete network-sample after dissolved"
-kubectl delete -f config/samples/ibp.com_v1beta1_network.yaml --token=${Admin1Token}
+kubectl delete -f config/samples/ibp.com_v1beta1_network.yaml --token=${Admin1Token}123
 waitNetwork network-sample "NoExist" "" ${Admin2Token}
 
 info "4.7 channel management"
 info "4.7.1 create channel channel=channel-sample"
-kubectl create -f config/samples/ibp.com_v1beta1_channel_create.yaml --token=${Admin1Token}
+kubectl create -f config/samples/ibp.com_v1beta1_channel_create.yaml --token=${Admin1Token}123
 function waitChannelReady() {
 	channelName=$1
 	want=$2
@@ -473,11 +473,11 @@ function waitChannelReady() {
 		sleep 5
 	done
 }
-waitChannelReady channel-sample "ChannelCreated" ${Admin1Token}
+waitChannelReady channel-sample "ChannelCreated" ${Admin1Token}123
 
 info "4.7.2 create peer node peer=org1peer1"
-Org1CaCert=$(kubectl get cm --token=${Admin1Token} -norg1 org1-connection-profile -ojson | jq -r '.binaryData."profile.json"' | base64 -d | jq -r '.tls.cert')
-Org1CaURI=$(kubectl get cm --token=${Admin1Token} -norg1 org1-connection-profile -ojson | jq -r '.binaryData."profile.json"' | base64 -d | jq -r '.endpoints.api')
+Org1CaCert=$(kubectl get cm --token=${Admin1Token}123 -norg1 org1-connection-profile -ojson | jq -r '.binaryData."profile.json"' | base64 -d | jq -r '.tls.cert')
+Org1CaURI=$(kubectl get cm --token=${Admin1Token}123 -norg1 org1-connection-profile -ojson | jq -r '.binaryData."profile.json"' | base64 -d | jq -r '.endpoints.api')
 function parseURI() {
 	uri=$1
 	# https://stackoverflow.com/a/6174447/5939892
@@ -511,7 +511,7 @@ kubectl create -f config/samples/peers/ibp.com_v1beta1_peer_org1peer1.yaml --dry
 	jq '.spec.storage.peer.class = "'$StorageClassName'"' | jq '.spec.storage.statedb.class = "'$StorageClassName'"' |
 	jq '.spec.secret.enrollment.component.cahost = "'$Org1CaHost'"' | jq '.spec.secret.enrollment.tls.cahost = "'$Org1CaHost'"' |
 	jq '.spec.secret.enrollment.component.caport = "'$Org1CaPort'"' | jq '.spec.secret.enrollment.tls.caport = "'$Org1CaPort'"' |
-	kubectl create --token=${Admin1Token} -f -
+	kubectl create --token=${Admin1Token}123 -f -
 function waitPeerReady() {
 	peerName=$1
 	ns=$2
@@ -535,7 +535,7 @@ function waitPeerReady() {
 		sleep 5
 	done
 }
-waitPeerReady org1peer1 org1 "" ${Admin1Token}
+waitPeerReady org1peer1 org1 "" ${Admin1Token}123
 
 info "4.7.3 create peer node peer=org2peer1"
 Org2CaCert=$(kubectl get cm --token=${Admin2Token} -norg2 org2-connection-profile -ojson | jq -r '.binaryData."profile.json"' | base64 -d | jq -r '.tls.cert')
@@ -554,7 +554,7 @@ kubectl create -f config/samples/peers/ibp.com_v1beta1_peer_org2peer1.yaml --dry
 waitPeerReady org2peer1 org2 "" ${Admin2Token}
 
 info "4.7.4 add peer node to channel peer=org1peer1 channel=channel-sample"
-kubectl apply -f config/samples/ibp.com_v1beta1_channel_join_org1.yaml --token=${Admin1Token}
+kubectl apply -f config/samples/ibp.com_v1beta1_channel_join_org1.yaml --token=${Admin1Token}123
 function waitPeerJoined() {
 	channelName=$1
 	peerIndex=$2
@@ -580,14 +580,14 @@ function waitPeerJoined() {
 		sleep 5
 	done
 }
-waitPeerJoined channel-sample 0 PeerJoined ${Admin1Token}
+waitPeerJoined channel-sample 0 PeerJoined ${Admin1Token}123
 
 info "4.7.5 add peer node to channel peer=org2peer1 channel=channel-sample"
 kubectl apply -f config/samples/ibp.com_v1beta1_channel_join_org2.yaml --token=${Admin2Token}
 waitPeerJoined channel-sample 1 PeerJoined ${Admin2Token}
 
 info "4.7.6 create a proposal to archive channel-sample"
-kubectl --token=${Admin1Token} apply -f config/samples/ibp.com_v1beta1_proposal_archive_channel.yaml
+kubectl --token=${Admin1Token}123 apply -f config/samples/ibp.com_v1beta1_proposal_archive_channel.yaml
 
 info "4.7.7 user=org2admin vote for pro=archive-channel-sample"
 waitVoteExist org2 archive-channel-sample ${Admin2Token}
@@ -595,13 +595,13 @@ kubectl patch vote -n org2 vote-org2-archive-channel-sample --type='json' \
 	-p='[{"op": "replace", "path": "/spec/decision", "value": true}]' --token=${Admin2Token}
 
 info "4.7.8 pro=archive-channel-sample become Succeeded"
-waitProposalSucceeded archive-channel-sample ${Admin1Token}
+waitProposalSucceeded archive-channel-sample ${Admin1Token}123
 
 info "4.7.9 channel=channel-sample become Archived"
-waitChannelReady channel-sample "ChannelArchived" ${Admin1Token}
+waitChannelReady channel-sample "ChannelArchived" ${Admin1Token}123
 
 info "4.7.10 create a proposal to unarchive channel-sample"
-kubectl --token=${Admin1Token} apply -f config/samples/ibp.com_v1beta1_proposal_unarchive_channel.yaml
+kubectl --token=${Admin1Token}123 apply -f config/samples/ibp.com_v1beta1_proposal_unarchive_channel.yaml
 
 info "4.7.11 user=org2admin vote for pro=unarchive-channel-sample"
 waitVoteExist org2 unarchive-channel-sample ${Admin2Token}
@@ -609,14 +609,14 @@ kubectl patch vote -n org2 vote-org2-unarchive-channel-sample --type='json' \
 	-p='[{"op": "replace", "path": "/spec/decision", "value": true}]' --token=${Admin2Token}
 
 info "4.7.12 pro=unarchive-channel-sample become Succeeded"
-waitProposalSucceeded unarchive-channel-sample ${Admin1Token}
+waitProposalSucceeded unarchive-channel-sample ${Admin1Token}123
 
 info "4.7.13 channel=channel-sample become Archived"
-waitChannelReady channel-sample "ChannelCreated" ${Admin1Token}
+waitChannelReady channel-sample "ChannelCreated" ${Admin1Token}123
 
 info "4.8 upload contract to minio"
 
-cat <<EOF | kubectl --token=${Admin1Token} apply -f -
+cat <<EOF | kubectl --token=${Admin1Token}123 apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
@@ -629,7 +629,7 @@ ak=$(kubectl -nbaas-system get secret fabric-minio -ojson | jq -r '.data.rootUse
 sk=$(kubectl -nbaas-system get secret fabric-minio -ojson | jq -r '.data.rootPassword' | base64 -d)
 
 cat ${InstallDirPath}/tekton/pipelines/sample/pre_sample_minio.yaml | sed "s/admin/${ak}/g" |
-	sed "s/passw0rd/${sk}/g" | kubectl --token=${Admin1Token} apply -f -
+	sed "s/passw0rd/${sk}/g" | kubectl --token=${Admin1Token}123 apply -f -
 
 function waitPipelineRun() {
 	pipelinerunName=$1
@@ -656,10 +656,10 @@ function waitPipelineRun() {
 		sleep 5
 	done
 }
-waitPipelineRun pre-sample-minio ${Admin1Token} "Succeeded"
+waitPipelineRun pre-sample-minio ${Admin1Token}123 "Succeeded"
 
 info "4.9 chaincodebuild"
-kubectl --token=${Admin1Token} apply -f config/samples/ibp.com_v1beta1_chaincodebuild_minio.yaml
+kubectl --token=${Admin1Token}123 apply -f config/samples/ibp.com_v1beta1_chaincodebuild_minio.yaml
 
 function waitchaincodebuildImage() {
 	chaincodebuildName=$1
@@ -694,18 +694,18 @@ waitchaincodebuildImage chaincodebuild-sample-minio $Admin1Token 2
 info "chaincode chaincodebuild-sample-minio done!"
 
 info "4.9.1 chaincodebuild for upgrade chaincode"
-kubectl --token=${Admin1Token} apply -f config/samples/ibp.com_v1beta1_chaincodebuild_minio_upgrade_chaincode.yaml
+kubectl --token=${Admin1Token}123 apply -f config/samples/ibp.com_v1beta1_chaincodebuild_minio_upgrade_chaincode.yaml
 
 waitchaincodebuildImage chaincodebuild-sample-minio-upgrade-chaincode $Admin1Token 2
 info "chaincode chaincodebuild-sample-minio-upgrade-chaincode done!"
 
 info "4.10 install chaincode"
 info "4.10.1 create endorsepolicy e-policy"
-kubectl --token=${Admin1Token} apply -f config/samples/ibp.com_v1beta1_chaincode_endorse_policy.yaml
+kubectl --token=${Admin1Token}123 apply -f config/samples/ibp.com_v1beta1_chaincode_endorse_policy.yaml
 info "4.10.2 create chaincode chaincode-sample"
-kubectl --token=${Admin1Token} apply -f config/samples/ibp.com_v1beta1_chaincode.yaml
+kubectl --token=${Admin1Token}123 apply -f config/samples/ibp.com_v1beta1_chaincode.yaml
 info "4.10.3 create proposal create-chaincode"
-kubectl --token=${Admin1Token} apply -f config/samples/ibp.com_v1beta1_proposal_create_chaincode.yaml
+kubectl --token=${Admin1Token}123 apply -f config/samples/ibp.com_v1beta1_proposal_create_chaincode.yaml
 info "4.10.4 patch vote vote-org2-create-chaincode"
 
 waitVoteExist org2 create-chaincode ${Admin2Token}
@@ -741,7 +741,7 @@ waitChaincodeRunning chaincode-sample $Admin1Token "ChaincodeRunning"
 
 info "4.10.6 upgrade chaincode to erc20"
 info "4.10.7 create proposal upgrade-chaincode"
-kubectl --token=${Admin1Token} apply -f config/samples/ibp.com_v1beta1_proposal_upgrade_chaincode.yaml
+kubectl --token=${Admin1Token}123 apply -f config/samples/ibp.com_v1beta1_proposal_upgrade_chaincode.yaml
 
 info "4.10.8 wait vote vote-org2-upgrade-chaincode"
 waitVoteExist org2 upgrade-chaincode ${Admin2Token}
@@ -755,7 +755,7 @@ waitChaincodeRunning chaincode-sample $Admin1Token "ChaincodeRunning"
 info "4.11 update federation member for fed=federation-sample"
 
 info "4.11.1 create proposal pro=add-member-federation-sample"
-kubectl create -f config/samples/ibp.com_v1beta1_proposal_add_member.yaml --token=${Admin1Token}
+kubectl create -f config/samples/ibp.com_v1beta1_proposal_add_member.yaml --token=${Admin1Token}123
 
 info "4.11.2 user=org2admin vote for pro=add-member-federation-sample"
 waitVoteExist org2 add-member-federation-sample ${Admin2Token}
@@ -768,18 +768,18 @@ kubectl patch vote -n org3 vote-org3-add-member-federation-sample --type='json' 
 	-p='[{"op": "replace", "path": "/spec/decision", "value": true}]' --token=${Admin3Token}
 
 info "4.11.4 pro=add-member-federation-sample become Succeeded"
-waitProposalSucceeded add-member-federation-sample ${Admin1Token}
+waitProposalSucceeded add-member-federation-sample ${Admin1Token}123
 
 info "4.11.5 fed=federation-sample member update, federation member update finish!"
-waitFed federation-sample "MembersUpdateTo3" ${Admin1Token}
+waitFed federation-sample "MembersUpdateTo3" ${Admin1Token}123
 
 info "4.12 update channel member, add org3 to channel=channel-sample"
 
 info "4.12.1 wait network sync member from federation"
-waitNetwork network-sample3 "MembersUpdateTo3" "" ${Admin1Token}
+waitNetwork network-sample3 "MembersUpdateTo3" "" ${Admin1Token}123
 
 info "4.12.2 need create proposal=update-channel-member"
-kubectl --token=${Admin1Token} create -f config/samples/ibp.com_v1beta1_proposal_update_channel_member.yaml
+kubectl --token=${Admin1Token}123 create -f config/samples/ibp.com_v1beta1_proposal_update_channel_member.yaml
 
 info "4.12.3 user=org2admin vote for proposal=update-channel-member"
 waitVoteExist org2 update-channel-member ${Admin2Token}
@@ -790,7 +790,7 @@ waitVoteExist org3 update-channel-member ${Admin3Token}
 kubectl patch vote -n org3 vote-org3-update-channel-member --type='json' -p='[{"op": "replace", "path": "/spec/decision", "value": true}]' --token=${Admin3Token}
 
 info "4.12.5 channel=channel-sample members update"
-waitChannelReady channel-sample "MembersUpdateTo3" ${Admin1Token}
+waitChannelReady channel-sample "MembersUpdateTo3" ${Admin1Token}123
 function waitOperatorLog() {
 	log=$1
 	START_TIME=$(date +%s)
@@ -835,7 +835,7 @@ waitPeerJoined channel-sample 2 PeerJoined ${Admin3Token}
 info "4.13 delete federation member for fed=federation-sample"
 
 info "4.13.1 create proposal pro=delete-member-federation-sample"
-kubectl create -f config/samples/ibp.com_v1beta1_proposal_delete_member.yaml --token=${Admin1Token}
+kubectl create -f config/samples/ibp.com_v1beta1_proposal_delete_member.yaml --token=${Admin1Token}123
 
 info "4.13.2 user=org2admin vote for pro=add-member-federation-sample"
 waitVoteExist org2 delete-member-federation-sample ${Admin2Token}
@@ -848,10 +848,10 @@ kubectl patch vote -n org3 vote-org3-delete-member-federation-sample --type='jso
 	-p='[{"op": "replace", "path": "/spec/decision", "value": true}]' --token=${Admin3Token}
 
 info "4.13.4 pro=delete-member-federation-sample become Succeeded"
-waitProposalSucceeded delete-member-federation-sample ${Admin1Token}
+waitProposalSucceeded delete-member-federation-sample ${Admin1Token}123
 
 info "4.13.5 fed=federation-sample member update, federation member update finish!"
-waitFed federation-sample "MembersUpdateTo2" ${Admin1Token}
+waitFed federation-sample "MembersUpdateTo2" ${Admin1Token}123
 
 info "5. Checking restarting operator will not have any side effects on the spec of the resource."
 kubectl get all --all-namespaces -o json | jq -c '.items | sort_by(.metadata.name, .metadata.namespace)[] | select(.metadata.namespace != "tekton-pipelines" and (.metadata.name | startswith("controller-manager-") | not) and .metadata.namespace != "baas-system") | .spec' >old.json
