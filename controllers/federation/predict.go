@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"time"
 
 	current "github.com/IBM-Blockchain/fabric-operator/api/v1beta1"
 	k8sclient "github.com/IBM-Blockchain/fabric-operator/pkg/k8s/controllerclient"
@@ -174,6 +175,26 @@ func (r *ReconcileFederation) ProposalUpdateFunc(e event.UpdateEvent) bool {
 	}
 	newMember := make([]current.Member, 0)
 	now := v1.Now()
+	if !newProposal.Spec.EndAt.IsZero() && newProposal.Spec.EndAt.Before(&now) {
+		fed.Status.CRStatus = current.CRStatus{
+			Type:              current.FederationFailed,
+			Status:            current.False,
+			Reason:            "vote expired",
+			Message:           fmt.Sprintf("vote end date is %s, current is %s", newProposal.Spec.EndAt.Format(time.RFC3339), now.Format(time.RFC3339)),
+			LastHeartbeatTime: metav1.Now(),
+		}
+		if err := r.client.PatchStatus(context.TODO(), fed, nil, k8sclient.PatchOption{
+			Resilient: &k8sclient.ResilientPatch{
+				Retry:    3,
+				Into:     &current.Federation{},
+				Strategy: client.MergeFrom,
+			},
+		}); err != nil {
+			log.Error(err, "vote expired, failed to update federation status")
+		}
+		return false
+	}
+
 	if newProposal.Status.Phase == current.ProposalFinished {
 		for _, c := range newProposal.Status.Conditions {
 			switch c.Type {
