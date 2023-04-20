@@ -929,6 +929,31 @@ git diff --color-words --no-index old.json new.json && same=0 || same=1
 if [[ $same -eq 1 ]]; then
 	exit 1
 fi
+
+info "6 install bc-saas"
+info "6.1 get channel connection profile"
+conn=`(kubectl --token=${Admin1Token} -norg1 get cm chan-channel-sample-connection-profile -ojson|jq -r '.binaryData."profile.json"'|base64 -d)`
+userinfo=`(echo $conn|jq '.organizations.org1.users.org1admin')`
+peerinfo=`(echo $conn|jq '.peers."org1-org1peer1"')`
+
+jq ".fabProfile.user = $userinfo" ${InstallDirPath}/saas/files/network.json \
+    | jq ".fabProfile.endpoint = $peerinfo" > ${InstallDirPath}/saas/files/a.json
+cat ${InstallDirPath}/saas/files/a.json > ${InstallDirPath}/saas/files/network.json
+rm ${InstallDirPath}/saas/files/a.json
+
+info "6.2 install bc-saas"
+cd ${InstallDirPath}
+. ./scripts/e2e.sh --saas
+
+cd ${RootPath}
+
+info "6.3 test bc-saas"
+respcode=$(curl --write-out '%{http_code}' --silent --output /dev/null http://bc-saas.${ingressNodeIP}.nip.io/depository/hf/metadata)
+if [[ ${respcode} != "200" ]]; then
+	echo "expect 200 code, but got ${respcode}"
+	exit 1
+fi
+
 ################################################################################
 info "cache component image"
 source ${InstallDirPath}/scripts/cache-image.sh
